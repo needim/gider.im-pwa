@@ -1,0 +1,45 @@
+{
+	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+	"organizeImports": {
+		"enabled": true
+	},
+	"linter": {
+		"enabled": true,
+		"ignore": [
+			"**/.next/**",
+			"**/node_modules/**",
+			"**/dist/**",
+			"**/paraglide/**",
+			"**/dev-dist/**",
+			"**/*.css"
+		],
+		"rules": {
+			"recommended": true,
+			"style": {
+				"noNonNullAssertion": "off",
+				"noParameterAssign": "off"
+			},
+			"complexity": {
+				"noForEach": "off",
+				"noBannedTypes": "off"
+			},
+			"suspicious": {
+				"noPrototypeBuiltins": "off",
+				"noArrayIndexKey": "off"
+			},
+			"a11y": {
+				"noSvgWithoutTitle": "off",
+				"useButtonType": "off"
+			}
+		}
+	},
+	"formatter": {
+		"enabled": true,
+		"ignore": [
+			"**/.next/**",
+			"**/node_modules/**",
+			"**/dist/**",
+			"**/paraglide/**"
+		]
+	}
+}
