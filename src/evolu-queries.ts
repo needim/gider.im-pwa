@@ -465,7 +465,6 @@ export const getCalculations = ({
 				foresight: Record<string, number>;
 			};
 			// ---
-			hasMultipleCurrencies: boolean;
 			hasAnyFullfilled: boolean;
 		}
 	> = {};
@@ -568,13 +567,18 @@ export const getCalculations = ({
 				-totalExpectedExpenseGroupedByCurrency[currency];
 		});
 
-		const hasMultipleCurrencies =
-			Object.keys(incomesGroupedByCurrency).length > 1 ||
-			Object.keys(expensesGroupedByCurrency).length > 1;
+		const allUsedCurrencies = new Set([
+			...Object.keys(incomesGroupedByCurrency),
+			...Object.keys(expensesGroupedByCurrency),
+		]);
+
+		const isDifferentCurrencyUsed = Array.from(allUsedCurrencies).some(
+			(currency) => currency !== mainCurrency,
+		);
 
 		let inMainCurrencyActual = 0;
 		let inMainCurrencyForesight = 0;
-		if (hasMultipleCurrencies && Object.keys(rates).length > 0) {
+		if (isDifferentCurrencyUsed && Object.keys(rates).length > 0) {
 			inMainCurrencyActual = Object.entries(resultGroupedByCurrency).reduce(
 				(acc, [currency, amount]) => {
 					if (rates[currency]) acc += amount * rates[currency];
@@ -591,7 +595,7 @@ export const getCalculations = ({
 			}, 0);
 		}
 
-		const inMainCurrency = hasMultipleCurrencies
+		const inMainCurrency = isDifferentCurrencyUsed
 			? {
 					actual: inMainCurrencyActual,
 					foresight: inMainCurrencyForesight,
@@ -636,7 +640,6 @@ export const getCalculations = ({
 				actual: resultGroupedByCurrency,
 				foresight: resultGroupedByCurrencyForesight,
 			},
-			hasMultipleCurrencies,
 			hasAnyFullfilled,
 		};
 	}

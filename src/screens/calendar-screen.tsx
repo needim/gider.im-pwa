@@ -55,7 +55,6 @@ export function CalendarScreen(): React.ReactElement {
 						key={`${i}-${t.id}-${t.recurringConfigId}`}
 						entry={t}
 						editDialogRef={editDialogRef}
-						long={CALCULATIONS[viewingIndex].hasMultipleCurrencies}
 					/>
 				))}
 			</div>
