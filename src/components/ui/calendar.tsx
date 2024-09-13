@@ -15,11 +15,11 @@ function Calendar({
 	showOutsideDays = true,
 	...props
 }: CalendarProps) {
-  const { lang } = useLocalization();
+	const { lang } = useLocalization();
   
 	return (
 		<DayPicker
-      locale={lang === "tr" ? tr : enUS}
+			locale={lang === "tr" ? tr : enUS}
 			showOutsideDays={showOutsideDays}
 			className={cn("p-3", className)}
 			classNames={{
