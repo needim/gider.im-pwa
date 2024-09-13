@@ -1,7 +1,9 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type * as React from "react";
 import { DayPicker } from "react-day-picker";
+import { enUS, tr } from "date-fns/locale";
 
+import { useLocalization } from "@/hooks/use-localization";
 import { buttonVariants } from "@/components/ui/button.variants";
 import { cn } from "@/lib/utils";
 
@@ -13,8 +15,11 @@ function Calendar({
 	showOutsideDays = true,
 	...props
 }: CalendarProps) {
+	const { lang } = useLocalization();
+  
 	return (
 		<DayPicker
+			locale={lang === "tr" ? tr : enUS}
 			showOutsideDays={showOutsideDays}
 			className={cn("p-3", className)}
 			classNames={{
