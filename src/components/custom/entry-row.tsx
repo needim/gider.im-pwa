@@ -71,27 +71,23 @@ export function EntryRow({
 				</motion.div>
 				<div className="flex flex-col gap-0 align-middle grow">
 					<div className="font-medium text-sm">
-						<span className="text-muted-foreground">
-							{entry.details.entryGroup?.name}
-							{entry.details.entryGroup?.name && " "}
-						</span>{" "}
+						{entry.details.entryGroup && (
+							<span className="text-muted-foreground">
+								{entry.details.entryGroup?.name}{" "}
+							</span>
+						)}
 						{entry.details.name}
 					</div>
 					<div className="text-xs flex items-center gap-2 text-muted-foreground tabular-nums">
 						<span>{dayjs(entry.date).format("D MMM")}</span>
-						{!!entry.recurringConfigId && (
-							<span className="flex items-center gap-0.5 text-muted-foreground">
-								<IconRotateClockwise2 className="size-3" />
-								<span>
-									{entry.index}/
-									{entry.interval === 0 ? (
-										<IconInfinity className="inline" size={14} />
-									) : (
-										Math.round(entry.interval / (entry.config?.every ?? 1))
-									)}
-								</span>
-							</span>
-						)}
+						<span className="text-xs font-sans text-right text-muted-foreground flex items-center gap-2 justify-end">
+							{entry.details.entryTag?.name && (
+								<Tag
+									name={entry.details.entryTag.name}
+									color={entry.details.entryTag.color as TagColor}
+								/>
+							)}
+						</span>
 					</div>
 				</div>
 				<span className="pr-0.5 flex flex-col text-right">
@@ -103,14 +99,20 @@ export function EntryRow({
 						className="font-medium"
 						showAs={entry.details.type === "expense" ? "minus" : undefined}
 					/>
-					<span className="text-xs font-sans text-right text-muted-foreground flex items-center gap-2 justify-end">
-						{entry.details.entryTag?.name && (
-							<Tag
-								name={entry.details.entryTag.name}
-								color={entry.details.entryTag.color as TagColor}
-							/>
-						)}
-					</span>
+
+					{!!entry.recurringConfigId && (
+						<span className="text-xs font-sans text-right text-muted-foreground flex items-center gap-2 justify-end">
+							<IconRotateClockwise2 className="size-3" />
+							<span>
+								{entry.index}/
+								{entry.interval === 0 ? (
+									<IconInfinity className="inline" size={14} />
+								) : (
+									Math.round(entry.interval / (entry.config?.every ?? 1))
+								)}
+							</span>
+						</span>
+					)}
 				</span>
 			</div>
 			<div className="pr-4">
