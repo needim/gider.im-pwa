@@ -22,7 +22,7 @@ export default function OnboardingWelcome({
 	const { m } = useLocalization();
 	return (
 		<motion.div
-			className="z-10 w-full pt-24 h-dvh px-12"
+			className="z-10 w-full py-12 h-dvh px-12"
 			exit={{ opacity: 0, scale: 0.95 }}
 			transition={{ duration: 0.3, type: "spring" }}
 		>
