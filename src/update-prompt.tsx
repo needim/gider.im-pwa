@@ -1,7 +1,7 @@
+import { useRegisterSW } from "virtual:pwa-register/react";
 import { ToastAction, ToastClose } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 import { useEffect } from "react";
-import { useRegisterSW } from "virtual:pwa-register/react";
 
 const PERIOD = 30 * 1000; // 30 seconds
 

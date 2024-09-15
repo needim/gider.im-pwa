@@ -5,6 +5,8 @@ import {
 	getCalculations,
 	populateEntries,
 	recurringConfigsQuery,
+	type TCalculations,
+	type TPopulatedEntry,
 } from "@/evolu-queries";
 import { useFilters } from "@/hooks/use-filters";
 import { useLocalization } from "@/hooks/use-localization";
@@ -15,6 +17,26 @@ import { useLocalStorage } from "@uidotdev/usehooks";
 import dayjs from "dayjs";
 import type React from "react";
 import { type ReactNode, useEffect, useState } from "react";
+
+export interface ScreensContextType {
+	activeScreen: TScreenId;
+	setScreen: (id: TScreenId) => void;
+	// ---- calendar screen ----
+	calendarIndex: string; // MM-YYYY
+	setCalendarIndex: (index: string) => void;
+	calendarType: TEntryType;
+	setCalendarType: (type: TEntryType) => void;
+	calendarVision: TCalendarVision;
+	setCalendarVision: (vision: TCalendarVision) => void;
+	viewportStartDate: dayjs.Dayjs;
+	viewportEndDate: dayjs.Dayjs;
+	isViewingCurrentMonth: boolean;
+	populatedEntries: TPopulatedEntry[];
+	CALCULATIONS: TCalculations;
+	currentMonthIndex: number;
+	viewingIndex: number;
+	totalMonthCount: number;
+}
 
 export const ScreensProvider: React.FC<{ children: ReactNode }> = ({
 	children,

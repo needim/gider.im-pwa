@@ -31,12 +31,13 @@ My vision is to offer a reliable, free platform for managing personal finances t
 ##  **Features**
 
 - [x] **Privacy First**: We don’t track or sell your data. Your information is encrypted locally and stored securely.
+- [x] **Open Source**: Our code is open-source and available for review on GitHub.
+- [x] **Free**: gider.im is free to use, with no hidden costs or fees.
 - [x] **Ad-Free**: Enjoy a clean, ad-free experience without interruptions.
+- [x] **PWA**: Enjoy a seamless experience with our Progressive Web App.
+- [x] **Mark Transactions**: Mark transactions as paid or unpaid for easy tracking.
 - [x] **Simple Design**: A user-friendly interface makes it easy to track your finances.
 - [x] **Secure**: Your data is encrypted and stored securely.
-- [x] **Free**: gider.im is free to use, with no hidden costs or fees.
-- [x] **Open Source**: Our code is open-source and available for review on GitHub.
-- [x] **PWA**: Enjoy a seamless experience with our Progressive Web App.
 - [x] **Community-Driven**: We value community feedback and contributions.
 - [x] **Donation-Powered**: Support us through donations to keep the app ad-free and sustainable.
 - [x] **Cross-Platform**: Access gider.im on any device, anywhere.

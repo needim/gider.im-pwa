@@ -1,7 +1,7 @@
-import { paraglide } from "@inlang/paraglide-vite";
-import react from "@vitejs/plugin-react-swc";
 import fs from "node:fs";
 import path from "node:path";
+import { paraglide } from "@inlang/paraglide-vite";
+import react from "@vitejs/plugin-react-swc";
 import Unfonts from "unplugin-fonts/vite";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";

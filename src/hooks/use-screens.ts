@@ -1,5 +1,5 @@
 import { ScreensContext } from "@/contexts/screens";
-import type { ScreensContextType } from "@/types";
+import type { ScreensContextType } from "@/providers/screens";
 import { useContext } from "react";
 
 export const useScreens = (): ScreensContextType => {

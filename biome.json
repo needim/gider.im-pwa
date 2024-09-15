@@ -1,18 +1,20 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+	"$schema": "https://biomejs.dev/schemas/1.9.0/schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"defaultBranch": "main",
+		"root": ".",
+		"useIgnoreFile": true
+	},
 	"organizeImports": {
 		"enabled": true
 	},
+	"files": {
+		"ignore": ["**/paraglide/**"]
+	},
 	"linter": {
 		"enabled": true,
-		"ignore": [
-			"**/.next/**",
-			"**/node_modules/**",
-			"**/dist/**",
-			"**/paraglide/**",
-			"**/dev-dist/**",
-			"**/*.css"
-		],
 		"rules": {
 			"recommended": true,
 			"style": {
@@ -30,16 +32,14 @@
 			"a11y": {
 				"noSvgWithoutTitle": "off",
 				"useButtonType": "off"
+			},
+			"correctness": {
+				"noUnknownProperty": "off",
+				"noUnknownFunction": "off"
 			}
 		}
 	},
 	"formatter": {
-		"enabled": true,
-		"ignore": [
-			"**/.next/**",
-			"**/node_modules/**",
-			"**/dist/**",
-			"**/paraglide/**"
-		]
+		"enabled": true
 	}
 }

@@ -1,10 +1,10 @@
+import { enUS, tr } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type * as React from "react";
 import { DayPicker } from "react-day-picker";
-import { enUS, tr } from "date-fns/locale";
 
-import { useLocalization } from "@/hooks/use-localization";
 import { buttonVariants } from "@/components/ui/button.variants";
+import { useLocalization } from "@/hooks/use-localization";
 import { cn } from "@/lib/utils";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
@@ -16,7 +16,7 @@ function Calendar({
 	...props
 }: CalendarProps) {
 	const { lang } = useLocalization();
-  
+
 	return (
 		<DayPicker
 			locale={lang === "tr" ? tr : enUS}
