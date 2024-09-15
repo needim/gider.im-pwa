@@ -23,6 +23,29 @@ If you find a bug, please report it by opening an issue on our GitHub repository
 5. **Push to your fork**: Push your changes to your forked repository.
 6. **Submit a pull request**: Open a pull request on the original repository with a clear description of your changes and any relevant information.
 
+## Development Flow
+
+To set up the project for development, follow these steps:
+
+1. First, setup package manager & install dependencies.
+
+  ```bash
+  corepack up
+  ```
+
+2. Run the project in development mode.
+
+  ```bash
+  node --run dev #or pnpm dev
+  ```
+
+3. (Optional) If you want https, install [mkcert](https://github.com/FiloSottile/mkcert) and run the following commands.
+
+  ```bash
+  mkcert -install
+  mkcert localhost
+  ```
+
 ## Code Style Guidelines
 
 - Follow the existing code style and conventions.
