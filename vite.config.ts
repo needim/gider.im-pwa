@@ -1,7 +1,7 @@
-import fs from "node:fs";
-import path from "node:path";
 import { paraglide } from "@inlang/paraglide-vite";
 import react from "@vitejs/plugin-react-swc";
+import fs from "node:fs";
+import path from "node:path";
 import Unfonts from "unplugin-fonts/vite";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
@@ -13,6 +13,9 @@ export default defineConfig({
 	},
 	worker: {
 		format: "es",
+	},
+	define: {
+		__APP_VERSION__: JSON.stringify(process.env.npm_package_version),
 	},
 	server: {
 		host: "0.0.0.0",

@@ -51,7 +51,7 @@ export function SettingsScreen() {
 				<div className="px-4">
 					<div className="text-3xl font-bold mb-4">Settings</div>
 
-					<div className="flex flex-col gap-4 mb-4">
+					<div className="flex flex-col gap-6 mb-4">
 						<div>
 							<h1 className="text-xs text-zinc-400 dark:text-zinc-600 uppercase font-bold mb-1">
 								{m.Currency()}
@@ -376,7 +376,7 @@ export function SettingsScreen() {
 					</div>
 
 					<div className="text-muted-foreground text-xs mt-4 flex items-center gap-2 justify-center">
-						<span>gider.im v0.5.0</span>
+						<span>gider.im v{__APP_VERSION__}</span>
 						<span>•</span>
 						<p>
 							Made by{" "}

@@ -1,4 +1,5 @@
 {
+	"ignoreCommand": "git log -1 --pretty=oneline --abbrev-commit | grep -w '[skip ci]' && exit 0 || exit 1",
 	"headers": [
 		{
 			"source": "/(.*).(html|js|css|wasm)",
