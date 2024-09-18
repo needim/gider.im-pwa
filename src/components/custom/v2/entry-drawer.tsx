@@ -204,7 +204,7 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 				/>
 			</div>
 
-			<div className="flex flex-col items-center mb-8 grow justify-center relative">
+			<div className="flex flex-col items-center mb-6 grow justify-center relative">
 				<div className="mb-4 flex items-center w-full indent-11 pr-11">
 					<div
 						className={cn(
@@ -362,7 +362,7 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 				/>
 			</div>
 
-			<div className="grid grid-cols-3 gap-4">
+			<div className="grid grid-cols-3 gap-3 ">
 				{[1, 2, 3, 4, 5, 6, 7, 8, 9, decimalChar, 0].map((char) => (
 					<Button
 						key={char}
