@@ -712,24 +712,39 @@ export async function deleteEntry(
 			exclusionsQuery(entry.recurringConfigId),
 		);
 
-		// mark deletion to all exclusions after this date
-		allExclusions.rows
-			.filter((ex) => dayjs(ex.date).isAfter(dayjs(entry.date)))
-			.map((ex) => {
-				evolu.update("exclusion", {
-					id: ex.exclusionId,
-					reason: "deletion",
-				});
+		if (entry.index === 0) {
+			// we are deleting main entry, so delete recurring config also
+			evolu.update("recurringConfig", {
+				id: entry.recurringConfigId,
+				isDeleted: true,
 			});
 
-		// modify main entry's endDate and internal
-		evolu.update("recurringConfig", {
-			id: entry.recurringConfigId,
-			endDate: entry.date,
-			every: entry.config?.every || 1,
-			interval: entry.index - 1,
-			isDeleted: entry.index - 1 === 0, // if it's the last one, mark as deleted
-		});
+			allExclusions.rows.map((ex) => {
+				evolu.update("exclusion", {
+					id: ex.exclusionId,
+					isDeleted: true,
+				});
+			});
+		} else {
+			// delete exclusions after this date
+			allExclusions.rows
+				.filter((ex) => dayjs(ex.date).isAfter(dayjs(entry.date)))
+				.map((ex) => {
+					evolu.update("exclusion", {
+						id: ex.exclusionId,
+						isDeleted: true,
+					});
+				});
+
+			// modify main entry's endDate and internal
+			evolu.update("recurringConfig", {
+				id: entry.recurringConfigId,
+				endDate: entry.date,
+				every: entry.config?.every || 1,
+				interval: entry.index - 1,
+				isDeleted: entry.index - 1 === 0, // if it's the last one, mark as deleted
+			});
+		}
 	}
 
 	setTimeout(() => {
