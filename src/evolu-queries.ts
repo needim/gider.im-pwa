@@ -269,9 +269,9 @@ export const generateOccurrences = (
 ) => {
 	const occurences = [];
 	const MAX_OCCURENCES = {
-		year: 1,
-		month: 24,
-		week: 52,
+		year: 20,
+		month: 240,
+		week: 1248,
 	} as const;
 
 	const frequency = recurringConfig.frequency;
