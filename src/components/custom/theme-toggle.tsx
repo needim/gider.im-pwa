@@ -3,7 +3,7 @@
 import { useLocalization } from "@/hooks/use-localization";
 import useNextValue from "@/hooks/use-next-value";
 import { useTheme } from "@/hooks/use-theme";
-import { cn, setThemeColor } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { Theme } from "@/providers/theme";
 import {
 	IconContrastFilled,
@@ -57,8 +57,7 @@ export function ThemeToggle({
 
 	useEffect(() => {
 		setMounted(true);
-		setThemeColor(theme);
-	}, [theme]);
+	}, []);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {

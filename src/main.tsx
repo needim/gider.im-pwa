@@ -1,6 +1,6 @@
 import { Toaster } from "@/components/ui/toaster";
 import { evolu } from "@/evolu-db.ts";
-import { setThemeColor, storageKeys } from "@/lib/utils.tsx";
+import { storageKeys } from "@/lib/utils.tsx";
 
 import {
 	type AvailableLanguageTag,
@@ -26,7 +26,6 @@ const localLang =
 	(localStorage.getItem(storageKeys.lang) as AvailableLanguageTag) ||
 	sourceLanguageTag;
 setLanguageTag(localLang);
-setThemeColor(localTheme);
 
 window.oncontextmenu = () => false;
 
