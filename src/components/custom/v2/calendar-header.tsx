@@ -13,14 +13,7 @@ import { AutoTextSize } from "auto-text-size";
 import dayjs from "dayjs";
 
 export function CalendarHeader() {
-	const {
-		activeScreen,
-		calendarType,
-		setCalendarType,
-		calendarVision,
-		CALCULATIONS,
-		viewingIndex,
-	} = useScreens();
+	const { activeScreen, calendarType, setCalendarType, calendarVision, CALCULATIONS, viewingIndex } = useScreens();
 
 	const mode = calendarVision === "actual" ? "actual" : "foresight";
 	const { lang, m, mainCurrency } = useLocalization();
@@ -40,17 +33,9 @@ export function CalendarHeader() {
 					<Popover>
 						<PopoverTrigger asChild>
 							<div className="text-5xl py-3 font-semibold tracking-tight w-full flex justify-center">
-								<AutoTextSize
-									mode="oneline"
-									minFontSizePx={32}
-									maxFontSizePx={40}
-									fontSizePrecisionPx={0.1}
-								>
+								<AutoTextSize mode="oneline" minFontSizePx={32} maxFontSizePx={40} fontSizePrecisionPx={0.1}>
 									<AmountDisplay
-										amount={
-											CALCULATIONS[viewingIndex].result.inMainCurrency[mode] ||
-											0
-										}
+										amount={CALCULATIONS[viewingIndex].result.inMainCurrency[mode].total || 0}
 										currencyCode={mainCurrency}
 										type="short"
 									/>
@@ -63,20 +48,15 @@ export function CalendarHeader() {
 								<div className="-mx-4 -my-2 -mb-4 text-sm">
 									<div className="flex text-muted-foreground flex-col divide-y divide-zinc-100 dark:divide-zinc-900">
 										<h1 className="pb-1 px-4 text-base text-foreground">
-											<span className="text-green-700 dark:text-green-400 font-medium">
-												{m.Income()}
-											</span>
+											<span className="text-green-700 dark:text-green-400 font-medium">{m.Income()}</span>
 										</h1>
 										<div className="py-1 flex px-4 items-start justify-between">
 											<span>{m.ExpectedIncome()}</span>
 											<div className="flex flex-col text-right">
-												{getEntries(
-													CALCULATIONS[viewingIndex]
-														.totalExpectedIncomeGroupedByCurrency,
-												).map(([currencyCode, total]) => (
+												{Object.entries(CALCULATIONS[viewingIndex].grouped.income).map(([currencyCode, data]) => (
 													<AmountDisplay
 														key={`totalExpectedIncomeGroupedByCurrency-${currencyCode}`}
-														amount={total.toString() ?? "0"}
+														amount={data.expected.toString() ?? "0"}
 														type="short"
 														currencyCode={currencyCode}
 													/>
@@ -86,13 +66,10 @@ export function CalendarHeader() {
 										<div className="py-1 flex px-4 items-start justify-between">
 											<span>{m.Received()}</span>
 											<div className="flex flex-col text-right">
-												{getEntries(
-													CALCULATIONS[viewingIndex]
-														.totalReceivedIncomeGroupedByCurrency,
-												).map(([currencyCode, total]) => (
+												{Object.entries(CALCULATIONS[viewingIndex].grouped.income).map(([currencyCode, data]) => (
 													<AmountDisplay
 														key={`totalReceivedIncomeGroupedByCurrency-${currencyCode}`}
-														amount={total.toString() ?? "0"}
+														amount={data.fullfilled.toString() ?? "0"}
 														type="short"
 														currencyCode={currencyCode}
 													/>
@@ -102,13 +79,10 @@ export function CalendarHeader() {
 										<div className="py-1 flex px-4 items-start justify-between">
 											<span>{m.Remaining()}</span>
 											<div className="flex flex-col text-right">
-												{getEntries(
-													CALCULATIONS[viewingIndex]
-														.totalRemainingIncomeGroupedByCurrency,
-												).map(([currencyCode, total]) => (
+												{Object.entries(CALCULATIONS[viewingIndex].grouped.income).map(([currencyCode, data]) => (
 													<AmountDisplay
 														key={`totalRemainingIncomeGroupedByCurrency-${currencyCode}`}
-														amount={total.toString() ?? "0"}
+														amount={data.remaining.toString() ?? "0"}
 														type="short"
 														currencyCode={currencyCode}
 													/>
@@ -117,20 +91,15 @@ export function CalendarHeader() {
 										</div>
 
 										<h1 className="pt-3 pb-1 px-4 text-base text-foreground">
-											<span className="text-red-700 dark:text-red-400 font-medium">
-												{m.Expense()}
-											</span>
+											<span className="text-red-700 dark:text-red-400 font-medium">{m.Expense()}</span>
 										</h1>
 										<div className="py-1 flex px-4 items-start justify-between">
 											<span>{m.ExpectedExpense()}</span>
 											<div className="flex flex-col text-right">
-												{getEntries(
-													CALCULATIONS[viewingIndex]
-														.totalExpectedExpenseGroupedByCurrency,
-												).map(([currencyCode, total]) => (
+												{Object.entries(CALCULATIONS[viewingIndex].grouped.expense).map(([currencyCode, data]) => (
 													<AmountDisplay
 														key={`totalExpectedExpenseGroupedByCurrency-${currencyCode}`}
-														amount={total.toString() ?? "0"}
+														amount={data.expected.toString() ?? "0"}
 														type="short"
 														showAs="minus"
 														currencyCode={currencyCode}
@@ -141,13 +110,10 @@ export function CalendarHeader() {
 										<div className="py-1 flex px-4 items-start justify-between">
 											<span>{m.Paid()}</span>
 											<div className="flex flex-col text-right">
-												{getEntries(
-													CALCULATIONS[viewingIndex]
-														.totalPaidExpenseGroupedByCurrency,
-												).map(([currencyCode, total]) => (
+												{Object.entries(CALCULATIONS[viewingIndex].grouped.expense).map(([currencyCode, data]) => (
 													<AmountDisplay
 														key={`totalPaidExpenseGroupedByCurrency-${currencyCode}`}
-														amount={total.toString() ?? "0"}
+														amount={data.fullfilled.toString() ?? "0"}
 														type="short"
 														showAs="minus"
 														currencyCode={currencyCode}
@@ -158,13 +124,10 @@ export function CalendarHeader() {
 										<div className="py-1 flex px-4 items-start justify-between">
 											<span>{m.Remaining()}</span>
 											<div className="flex flex-col text-right">
-												{getEntries(
-													CALCULATIONS[viewingIndex]
-														.totalRemainingExpenseGroupedByCurrency,
-												).map(([currencyCode, total]) => (
+												{Object.entries(CALCULATIONS[viewingIndex].grouped.expense).map(([currencyCode, data]) => (
 													<AmountDisplay
 														key={`totalRemainingExpenseGroupedByCurrency-${currencyCode}`}
-														amount={total.toString() ?? "0"}
+														amount={data.remaining.toString() ?? "0"}
 														type="short"
 														showAs="minus"
 														currencyCode={currencyCode}
@@ -181,9 +144,7 @@ export function CalendarHeader() {
 												<div className="py-1 flex px-4 items-start justify-between">
 													<span />
 													<div className="flex flex-col text-center text-base w-full">
-														{getEntries(
-															CALCULATIONS[viewingIndex].result.actual,
-														).map(([currencyCode, total]) => (
+														{getEntries(CALCULATIONS[viewingIndex].result.actual).map(([currencyCode, total]) => (
 															<AmountDisplay
 																key={`totalExpectedExpenseGroupedByCurrency-${currencyCode}`}
 																amount={total.toString() ?? "0"}
@@ -201,9 +162,7 @@ export function CalendarHeader() {
 												<div className="py-1 flex px-4 items-start justify-between">
 													<span />
 													<div className="flex flex-col text-center text-base w-full">
-														{getEntries(
-															CALCULATIONS[viewingIndex].result.foresight,
-														).map(([currencyCode, total]) => (
+														{getEntries(CALCULATIONS[viewingIndex].result.foresight).map(([currencyCode, total]) => (
 															<AmountDisplay
 																key={`totalExpectedExpenseGroupedByCurrency-${currencyCode}`}
 																amount={total.toString() ?? "0"}
@@ -226,10 +185,7 @@ export function CalendarHeader() {
 				<CalendarVisionSelect />
 			</div>
 			<div className="px-2 flex items-center gap-2 mt-4">
-				<CalendarTabs
-					value={calendarType}
-					onValueChange={(value) => setCalendarType(value)}
-				/>
+				<CalendarTabs value={calendarType} onValueChange={(value) => setCalendarType(value)} />
 				<ConditionalView condition={activeScreen === "calendar"}>
 					<Filters />
 				</ConditionalView>

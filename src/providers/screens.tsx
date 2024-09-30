@@ -2,10 +2,10 @@ import { ScreensContext } from "@/contexts/screens";
 import type { TGroupId, TTagId } from "@/evolu-db";
 import {
 	entriesQuery,
-	getCalculations,
+	getCalculations_v2,
 	populateEntries,
 	recurringConfigsQuery,
-	type TCalculations,
+	type TCALCULATIONS_OUTPUT_V2,
 	type TPopulatedEntry,
 } from "@/evolu-queries";
 import { useFilters } from "@/hooks/use-filters";
@@ -16,7 +16,7 @@ import { useQuery } from "@evolu/react";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import dayjs from "dayjs";
 import type React from "react";
-import { type ReactNode, useEffect, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 export interface ScreensContextType {
 	activeScreen: TScreenId;
@@ -32,39 +32,30 @@ export interface ScreensContextType {
 	viewportEndDate: dayjs.Dayjs;
 	isViewingCurrentMonth: boolean;
 	populatedEntries: TPopulatedEntry[];
-	CALCULATIONS: TCalculations;
+	CALCULATIONS: TCALCULATIONS_OUTPUT_V2;
 	currentMonthIndex: number;
 	viewingIndex: number;
 	totalMonthCount: number;
 }
 
-export const ScreensProvider: React.FC<{ children: ReactNode }> = ({
-	children,
-}) => {
+export const ScreensProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 	// const [owner, setOwner] = useState(evolu.getOwner());
 	// const [error, setError] = useState(evolu.getError());
 	const recurringConfigs = useQuery(recurringConfigsQuery);
 	const entries = useQuery(entriesQuery);
-	const populatedEntries = populateEntries(entries.rows, recurringConfigs.rows);
-
+	const populatedEntries = useMemo(
+		() => populateEntries(entries.rows, recurringConfigs.rows),
+		[entries.rows, recurringConfigs.rows],
+	);
 	// user can view 3 months into the past
 	const viewportStartDate = dayjs().startOf("month").subtract(3, "month");
 	// user can only view 12 months into the future
 	const viewportEndDate = dayjs().startOf("month").add(11, "month");
 
-	const [screen, setScreen] = useLocalStorage<TScreenId>(
-		storageKeys.activeScreen,
-		"calendar",
-	);
+	const [screen, setScreen] = useLocalStorage<TScreenId>(storageKeys.activeScreen, "calendar");
 
-	const [calendarType, setCalendarType] = useLocalStorage<TEntryType>(
-		storageKeys.calendarType,
-		"income",
-	);
-	const [calendarVision, setCalendarVision] = useLocalStorage<TCalendarVision>(
-		storageKeys.calendarVision,
-		"foresight",
-	);
+	const [calendarType, setCalendarType] = useLocalStorage<TEntryType>(storageKeys.calendarType, "income");
+	const [calendarVision, setCalendarVision] = useLocalStorage<TCalendarVision>(storageKeys.calendarVision, "foresight");
 
 	const currentDate = dayjs();
 
@@ -74,10 +65,7 @@ export const ScreensProvider: React.FC<{ children: ReactNode }> = ({
 	);
 
 	const currentMonthIndex = currentDate.diff(viewportStartDate, "month");
-	const viewingIndex = dayjs(calendarIndex).diff(
-		viewportStartDate.format("YYYY-MM"),
-		"month",
-	);
+	const viewingIndex = dayjs(calendarIndex).diff(viewportStartDate.format("YYYY-MM"), "month");
 
 	const totalMonthCount = viewportEndDate.diff(viewportStartDate, "month");
 
@@ -97,18 +85,19 @@ export const ScreensProvider: React.FC<{ children: ReactNode }> = ({
 		});
 	}, [viewingIndex, mainCurrency]);
 
-	const CALCULATIONS = getCalculations({
-		rates,
-		viewportStartDate,
-		viewportEndDate,
-		populatedEntries,
-		groupFilters: activeFilters
-			.filter((f) => f.type === "group")
-			.map((f) => f.id as TGroupId),
-		tagFilters: activeFilters
-			.filter((f) => f.type === "tag")
-			.map((f) => f.id as TTagId),
-	});
+	const CALCULATIONS = useMemo(
+		() =>
+			getCalculations_v2({
+				rates,
+				viewportStartDate,
+				viewportEndDate,
+				populatedEntries,
+				groupFilters: activeFilters.filter((f) => f.type === "group").map((f) => f.id as TGroupId),
+				tagFilters: activeFilters.filter((f) => f.type === "tag").map((f) => f.id as TTagId),
+				mainCurrency,
+			}),
+		[rates, mainCurrency, viewportStartDate, viewportEndDate, populatedEntries, activeFilters],
+	);
 
 	return (
 		<ScreensContext.Provider
