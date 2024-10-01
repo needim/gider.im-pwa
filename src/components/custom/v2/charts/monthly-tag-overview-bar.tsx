@@ -1,12 +1,11 @@
 import { AmountDisplay } from "@/components/custom/amount-display";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { useLocalization } from "@/hooks/use-localization";
-import { useScreens } from "@/hooks/use-screens";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
 
 export function MonthlyTagOverviewBar() {
-	const { CALCULATIONS, calendarVision } = useScreens();
-	const { mainCurrency, m } = useLocalization();
+	// const {  calendarVision } = useScreens();
+	const { mainCurrency } = useLocalization();
 
 	// const chartData: {
 	// 	month: string;
@@ -15,7 +14,7 @@ export function MonthlyTagOverviewBar() {
 	// 	total: number;
 	// }[] = [];
 
-	const mode = calendarVision === "actual" ? "actual" : "foresight";
+	// const mode = calendarVision === "actual" ? "actual" : "foresight";
 
 	// Object.values(CALCULATIONS).forEach((calculation) => {
 	// 	if (

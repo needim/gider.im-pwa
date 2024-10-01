@@ -10,7 +10,6 @@ export function CalendarMonthSwitcher(): React.ReactElement {
 	const { m } = useLocalization();
 
 	const currentMonth = dayjs().format("YYYY-MM");
-	const viewingMonth = dayjs(new Date(calendarIndex)).format("YYYY-MM");
 
 	const isPrevDisabled = viewingIndex === 0;
 	const isNextDisabled = viewingIndex === 13;
