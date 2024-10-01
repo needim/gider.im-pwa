@@ -1,9 +1,4 @@
-export type TScreenId =
-	| "calendar"
-	| "assets"
-	| "graphs"
-	| "settings"
-	| "add-entry";
+export type TScreenId = "calendar" | "assets" | "insights" | "settings" | "add-entry";
 
 export type TCalendarVision = "foresight" | "actual" | "hidden";
 

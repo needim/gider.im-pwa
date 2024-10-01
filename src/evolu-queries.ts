@@ -9,14 +9,8 @@ import {
 	evolu,
 } from "@/evolu-db";
 import { storageKeys } from "@/lib/utils";
-import {
-	type ExtractRow,
-	type NotNull,
-	cast,
-	jsonArrayFrom,
-	jsonObjectFrom,
-} from "@evolu/react";
-import dayjs from "dayjs";
+import { type ExtractRow, type NotNull, cast, jsonArrayFrom, jsonObjectFrom } from "@evolu/react";
+import dayjs, { type Dayjs } from "dayjs";
 
 type TNarrowed = {
 	name: NotNull;
@@ -82,11 +76,7 @@ export const recurringConfigsQuery = evolu.createQuery(
 												.selectFrom("entryGroup")
 												.select(["id as groupId", "name"])
 												.where("entryGroup.isDeleted", "is not", cast(true))
-												.whereRef(
-													"entryGroup.id",
-													"=",
-													"modifiedEntry.groupId",
-												),
+												.whereRef("entryGroup.id", "=", "modifiedEntry.groupId"),
 										).as("entryGroup"),
 									])
 									.select((eb) => [
@@ -99,11 +89,7 @@ export const recurringConfigsQuery = evolu.createQuery(
 										).as("entryTag"),
 									])
 									.$narrowType<TNarrowed>()
-									.whereRef(
-										"modifiedEntry.id",
-										"=",
-										"exclusion.modifiedEntryId",
-									),
+									.whereRef("modifiedEntry.id", "=", "exclusion.modifiedEntryId"),
 							).as("modifiedEntry"),
 						])
 						.where("exclusion.isDeleted", "is not", cast(true)),
@@ -157,11 +143,7 @@ export type TRecurringConfigRow = ExtractRow<typeof recurringConfigsQuery>;
 
 export const groupsQuery = evolu.createQuery(
 	(db) =>
-		db
-			.selectFrom("entryGroup")
-			.select(["id", "name"])
-			.where("isDeleted", "is not", cast(true))
-			.orderBy("createdAt"),
+		db.selectFrom("entryGroup").select(["id", "name"]).where("isDeleted", "is not", cast(true)).orderBy("createdAt"),
 	queryOptions,
 );
 
@@ -241,13 +223,7 @@ export const exclusionsQuery = (recurringId: TRecurringConfigId) =>
 		(db) =>
 			db
 				.selectFrom("exclusion")
-				.select([
-					"id as exclusionId",
-					"recurringId",
-					"modifiedEntryId",
-					"date",
-					"reason",
-				])
+				.select(["id as exclusionId", "recurringId", "modifiedEntryId", "date", "reason"])
 				.where("isDeleted", "is not", cast(true))
 				.where("recurringId", "is", recurringId)
 				.$narrowType<{
@@ -263,10 +239,8 @@ export type TEntryRow = ExtractRow<typeof entriesQuery>;
 export type TExclusionRow = TRecurringConfigRow["exclusions"][number];
 export type TModifiedEntry = TExclusionRow["modifiedEntry"];
 
-export const generateOccurrences = (
-	recurringConfig: TRecurringConfigRow,
-	exclusions: TExclusionRow[],
-) => {
+export const generateOccurrences = (recurringConfig: TRecurringConfigRow, exclusions: TExclusionRow[]) => {
+	// console.time("generateOccurrences");
 	const occurences = [];
 	const MAX_OCCURENCES = {
 		year: 20,
@@ -299,14 +273,9 @@ export const generateOccurrences = (
 		installment++;
 		const currDate = dayjs(startDate).add(i, frequency);
 
-		const isExcluded = exclusions.some(
-			(e) => currDate.isSame(dayjs(e.date), "day") && e.reason === "deletion",
-		);
+		const isExcluded = exclusions.some((e) => currDate.isSame(dayjs(e.date), "day") && e.reason === "deletion");
 
-		const isModified = exclusions.find(
-			(e) =>
-				currDate.isSame(dayjs(e.date), "day") && e.reason === "modification",
-		);
+		const isModified = exclusions.find((e) => currDate.isSame(dayjs(e.date), "day") && e.reason === "modification");
 
 		if (!isExcluded) {
 			occurences.push({
@@ -318,14 +287,13 @@ export const generateOccurrences = (
 		}
 	}
 
+	// console.timeEnd("generateOccurrences");
 	return occurences;
 };
 
 // needs a hard refactor
-export const populateEntries = (
-	entries: Readonly<TEntryRow[]>,
-	recurringConfigs: Readonly<TRecurringConfigRow[]>,
-) => {
+export const populateEntries = (entries: Readonly<TEntryRow[]>, recurringConfigs: Readonly<TRecurringConfigRow[]>) => {
+	// console.time("populateEntries");
 	const entriesList: Array<{
 		id: null | TEntryId;
 		recurringConfigId: null | TRecurringConfigId;
@@ -375,6 +343,7 @@ export const populateEntries = (
 
 	entriesList.sort((a, b) => a.date.getTime() - b.date.getTime());
 
+	// console.timeEnd("populateEntries");
 	return entriesList;
 };
 
@@ -393,36 +362,132 @@ export const groupByCurrency = (entries: TPopulatedEntry[]) => {
 	);
 };
 
-export const calculateTotals = (
-	groupedEntries: Record<string, TPopulatedEntry[]>,
-) => {
+export const calculateTotals = (groupedEntries: Record<string, TPopulatedEntry[]>) => {
 	return Object.entries(groupedEntries).reduce(
 		(acc, [currency, entries]) => {
-			acc[currency] = entries.reduce(
-				(acc, e) => acc + Number(e.details.amount),
-				0,
-			);
+			acc[currency] = entries.reduce((acc, e) => acc + Number(e.details.amount), 0);
 			return acc;
 		},
 		{} as Record<string, number>,
 	);
 };
 
-export const calculatedFullfilledTotals = (
-	groupedEntries: Record<string, TPopulatedEntry[]>,
-) => {
+export const calculatedFullfilledTotals = (groupedEntries: Record<string, TPopulatedEntry[]>) => {
 	return Object.entries(groupedEntries).reduce(
 		(acc, [currency, entries]) => {
-			acc[currency] = entries
-				.filter((e) => e.details.fullfilled)
-				.reduce((acc, e) => acc + Number(e.details.amount), 0);
+			acc[currency] = entries.filter((e) => e.details.fullfilled).reduce((acc, e) => acc + Number(e.details.amount), 0);
 			return acc;
 		},
 		{} as Record<string, number>,
 	);
 };
 
-// needs a hard refactor
+type TCALCULATIONS_OUTPUT = Record<
+	number,
+	{
+		month: Dayjs;
+		income: TPopulatedEntry[];
+		expense: TPopulatedEntry[];
+		assets: TPopulatedEntry[]; // not implemented yet
+		// groupedByCurrency: {
+		// 	income: Record<
+		// 		string,
+		// 		{
+		// 			entries: TPopulatedEntry[];
+		// 			expected: number;
+		// 			fullfilled: number;
+		// 			remaining: number;
+		// 		}
+		// 	>;
+		// 	expense: Record<
+		// 		string,
+		// 		{
+		// 			entries: TPopulatedEntry[];
+		// 			expected: number;
+		// 			fullfilled: number;
+		// 			remaining: number;
+		// 		}
+		// 	>;
+		// };
+		// ---
+		incomesGroupedByCurrency: Record<string, TPopulatedEntry[]>;
+		totalExpectedIncomeGroupedByCurrency: Record<string, number>;
+		totalReceivedIncomeGroupedByCurrency: Record<string, number>;
+		totalRemainingIncomeGroupedByCurrency: Record<string, number>;
+		// ---
+		expensesGroupedByCurrency: Record<string, TPopulatedEntry[]>;
+		totalExpectedExpenseGroupedByCurrency: Record<string, number>;
+		totalPaidExpenseGroupedByCurrency: Record<string, number>;
+		totalRemainingExpenseGroupedByCurrency: Record<string, number>;
+		// ---
+		result: {
+			inMainCurrency: {
+				actual: {
+					income: number;
+					expense: number;
+					total: number;
+				};
+				foresight: {
+					income: number;
+					expense: number;
+					total: number;
+				};
+			};
+			actual: Record<string, number>;
+			foresight: Record<string, number>;
+		};
+	}
+>;
+export type TCALCULATIONS_OUTPUT_V2 = Record<
+	number,
+	{
+		month: Dayjs;
+		income: TPopulatedEntry[];
+		expense: TPopulatedEntry[];
+		assets: TPopulatedEntry[]; // not implemented yet
+		grouped: {
+			income: Record<
+				string,
+				{
+					entries: TPopulatedEntry[];
+					expected: number;
+					fullfilled: number;
+					remaining: number;
+				}
+			>;
+			expense: Record<
+				string,
+				{
+					entries: TPopulatedEntry[];
+					expected: number;
+					fullfilled: number;
+					remaining: number;
+				}
+			>;
+		};
+		// ---
+		result: {
+			inMainCurrency: {
+				actual: {
+					income: number;
+					expense: number;
+					total: number;
+				};
+				foresight: {
+					income: number;
+					expense: number;
+					total: number;
+				};
+			};
+			actual: Record<string, number>;
+			foresight: Record<string, number>;
+		};
+	}
+>;
+
+/**
+ * @deprecated
+ */
 export const getCalculations = ({
 	rates,
 	viewportStartDate,
@@ -439,91 +504,48 @@ export const getCalculations = ({
 	tagFilters?: (TTagId | "no-tag")[];
 	monthFilter?: string;
 }) => {
-	const CALCULATIONS: Record<
-		number,
-		{
-			income: TPopulatedEntry[];
-			expense: TPopulatedEntry[];
-			assets: TPopulatedEntry[]; // not implemented yet
-			// ---
-			incomesGroupedByCurrency: Record<string, TPopulatedEntry[]>;
-			totalExpectedIncomeGroupedByCurrency: Record<string, number>;
-			totalReceivedIncomeGroupedByCurrency: Record<string, number>;
-			totalRemainingIncomeGroupedByCurrency: Record<string, number>;
-			// ---
-			expensesGroupedByCurrency: Record<string, TPopulatedEntry[]>;
-			totalExpectedExpenseGroupedByCurrency: Record<string, number>;
-			totalPaidExpenseGroupedByCurrency: Record<string, number>;
-			totalRemainingExpenseGroupedByCurrency: Record<string, number>;
-			// ---
-			result: {
-				inMainCurrency: {
-					actual: number;
-					foresight: number;
-				};
-				actual: Record<string, number>;
-				foresight: Record<string, number>;
-			};
-			// ---
-			hasAnyFullfilled: boolean;
-		}
-	> = {};
+	// console.time("getCalculations");
+	const CALCULATIONS: TCALCULATIONS_OUTPUT = {};
 
-	const mainCurrency = localStorage.getItem(storageKeys.mainCurrency) || "TRY";
+	let month: Dayjs = viewportStartDate;
+	const totalMonthCount = viewportEndDate.diff(viewportStartDate, "month");
+	const mainCurrency = localStorage.getItem(storageKeys.mainCurrency) || "TRY"; // TODO: get it from args
 
-	if (
-		(groupFilters && groupFilters.length > 0) ||
-		(tagFilters && tagFilters.length > 0)
-	) {
-		if (groupFilters && groupFilters.length > 0) {
-			populatedEntries = populatedEntries.filter((entry) =>
-				groupFilters.includes(entry.details.groupId || "no-group"),
-			);
-		}
-
-		if (tagFilters && tagFilters.length > 0) {
-			populatedEntries = populatedEntries.filter((entry) =>
-				tagFilters.includes(entry.details.tagId || "no-tag"),
-			);
-		}
+	if (groupFilters && groupFilters.length > 0) {
+		populatedEntries = populatedEntries.filter((entry) => groupFilters.includes(entry.details.groupId || "no-group"));
 	}
 
-	const totalMonthCount = viewportEndDate.diff(viewportStartDate, "month");
+	if (tagFilters && tagFilters.length > 0) {
+		populatedEntries = populatedEntries.filter((entry) => tagFilters.includes(entry.details.tagId || "no-tag"));
+	}
 
 	for (let i = 0; i <= totalMonthCount; i++) {
-		const month = viewportStartDate.add(i, "month");
+		month = viewportStartDate.add(i, "month");
 		const monthEntries = populatedEntries.filter(
-			(e) =>
-				dayjs(e.date).month() === month.month() &&
-				dayjs(e.date).year() === month.year(),
+			(e) => dayjs(e.date).month() === month.month() && dayjs(e.date).year() === month.year(),
 		);
 
 		const income = monthEntries.filter((e) => e.details.type === "income");
 		const expense = monthEntries.filter((e) => e.details.type === "expense");
 
-		const hasAnyFullfilled = monthEntries.some((e) => e.details.fullfilled);
-
 		const incomesGroupedByCurrency = groupByCurrency(income);
 		const expensesGroupedByCurrency = groupByCurrency(expense);
 
-		const totalExpectedIncomeGroupedByCurrency = calculateTotals(
-			incomesGroupedByCurrency,
-		);
-		const totalReceivedIncomeGroupedByCurrency = calculatedFullfilledTotals(
-			incomesGroupedByCurrency,
-		);
+		const allUsedCurrencies = new Set([
+			...Object.keys(incomesGroupedByCurrency),
+			...Object.keys(expensesGroupedByCurrency),
+		]);
 
-		const totalExpectedExpenseGroupedByCurrency = calculateTotals(
-			expensesGroupedByCurrency,
-		);
+		const isDifferentCurrencyUsed = Array.from(allUsedCurrencies).some((currency) => currency !== mainCurrency);
 
-		const totalPaidExpenseGroupedByCurrency = calculatedFullfilledTotals(
-			expensesGroupedByCurrency,
-		);
+		const totalExpectedIncomeGroupedByCurrency = calculateTotals(incomesGroupedByCurrency);
+		const totalReceivedIncomeGroupedByCurrency = calculatedFullfilledTotals(incomesGroupedByCurrency);
 
-		const resultGroupedByCurrencyForesight = Object.entries(
-			totalExpectedIncomeGroupedByCurrency,
-		).reduce(
+		const totalExpectedExpenseGroupedByCurrency = calculateTotals(expensesGroupedByCurrency);
+
+		const totalPaidExpenseGroupedByCurrency = calculatedFullfilledTotals(expensesGroupedByCurrency);
+
+		const resultGroupedByCurrencyForesight = Object.entries(totalExpectedIncomeGroupedByCurrency).reduce(
 			(acc, [currency]) => {
 				acc[currency] =
 					(totalExpectedIncomeGroupedByCurrency[currency] || 0) -
@@ -534,52 +556,39 @@ export const getCalculations = ({
 			{} as Record<string, number>,
 		);
 
-		const resultGroupedByCurrency = Object.entries(
-			totalExpectedIncomeGroupedByCurrency,
-		).reduce(
+		const resultGroupedByCurrency = Object.entries(totalExpectedIncomeGroupedByCurrency).reduce(
 			(acc, [currency]) => {
 				acc[currency] =
-					(totalReceivedIncomeGroupedByCurrency[currency] || 0) -
-					(totalPaidExpenseGroupedByCurrency[currency] || 0);
+					(totalReceivedIncomeGroupedByCurrency[currency] || 0) - (totalPaidExpenseGroupedByCurrency[currency] || 0);
 
 				return acc;
 			},
 			{} as Record<string, number>,
 		);
 
-		const missingCurrencies = Object.keys(
-			totalExpectedExpenseGroupedByCurrency,
-		).filter((currency) => !resultGroupedByCurrency.hasOwnProperty(currency));
+		const missingCurrencies = Object.keys(totalExpectedExpenseGroupedByCurrency).filter(
+			(currency) => !resultGroupedByCurrency.hasOwnProperty(currency),
+		);
 
-		const missingCurrenciesForsight = Object.keys(
-			totalExpectedExpenseGroupedByCurrency,
-		).filter(
+		const missingCurrenciesForsight = Object.keys(totalExpectedExpenseGroupedByCurrency).filter(
 			(currency) => !resultGroupedByCurrencyForesight.hasOwnProperty(currency),
 		);
 
 		missingCurrencies.forEach((currency) => {
-			resultGroupedByCurrency[currency] =
-				-totalPaidExpenseGroupedByCurrency[currency];
+			resultGroupedByCurrency[currency] = -totalPaidExpenseGroupedByCurrency[currency];
 		});
 
 		missingCurrenciesForsight.forEach((currency) => {
-			resultGroupedByCurrencyForesight[currency] =
-				-totalExpectedExpenseGroupedByCurrency[currency];
+			resultGroupedByCurrencyForesight[currency] = -totalExpectedExpenseGroupedByCurrency[currency];
 		});
 
-		const allUsedCurrencies = new Set([
-			...Object.keys(incomesGroupedByCurrency),
-			...Object.keys(expensesGroupedByCurrency),
-		]);
+		let inMainCurrencyActualIncome = 0;
+		let inMainCurrencyForesightIncome = 0;
+		let inMainCurrencyActualExpense = 0;
+		let inMainCurrencyForsightExpense = 0;
 
-		const isDifferentCurrencyUsed = Array.from(allUsedCurrencies).some(
-			(currency) => currency !== mainCurrency,
-		);
-
-		let inMainCurrencyActual = 0;
-		let inMainCurrencyForesight = 0;
 		if (isDifferentCurrencyUsed && Object.keys(rates).length > 0) {
-			inMainCurrencyActual = Object.entries(resultGroupedByCurrency).reduce(
+			inMainCurrencyActualIncome = Object.entries(totalReceivedIncomeGroupedByCurrency).reduce(
 				(acc, [currency, amount]) => {
 					if (rates[currency]) acc += amount * rates[currency];
 					return acc;
@@ -587,37 +596,68 @@ export const getCalculations = ({
 				0,
 			);
 
-			inMainCurrencyForesight = Object.entries(
-				resultGroupedByCurrencyForesight,
-			).reduce((acc, [currency, amount]) => {
-				if (rates[currency]) acc += amount * rates[currency];
-				return acc;
-			}, 0);
+			inMainCurrencyActualExpense = Object.entries(totalPaidExpenseGroupedByCurrency).reduce(
+				(acc, [currency, amount]) => {
+					if (rates[currency]) acc += amount * rates[currency];
+					return acc;
+				},
+				0,
+			);
+
+			inMainCurrencyForesightIncome = Object.entries(totalExpectedIncomeGroupedByCurrency).reduce(
+				(acc, [currency, amount]) => {
+					if (rates[currency]) acc += amount * rates[currency];
+					return acc;
+				},
+				0,
+			);
+
+			inMainCurrencyForsightExpense = Object.entries(totalExpectedExpenseGroupedByCurrency).reduce(
+				(acc, [currency, amount]) => {
+					if (rates[currency]) acc += amount * rates[currency];
+					return acc;
+				},
+				0,
+			);
 		}
 
 		const inMainCurrency = isDifferentCurrencyUsed
 			? {
-					actual: inMainCurrencyActual,
-					foresight: inMainCurrencyForesight,
+					actual: {
+						income: inMainCurrencyActualIncome,
+						expense: inMainCurrencyActualExpense,
+						total: inMainCurrencyActualIncome - inMainCurrencyActualExpense,
+					},
+					foresight: {
+						income: inMainCurrencyForesightIncome,
+						expense: inMainCurrencyForsightExpense,
+						total: inMainCurrencyForesightIncome - inMainCurrencyForsightExpense,
+					},
 				}
 			: {
-					actual: resultGroupedByCurrency[mainCurrency],
-					foresight: resultGroupedByCurrencyForesight[mainCurrency],
+					actual: {
+						income: totalReceivedIncomeGroupedByCurrency[mainCurrency],
+						expense: totalPaidExpenseGroupedByCurrency[mainCurrency],
+						total: resultGroupedByCurrency[mainCurrency],
+					},
+					foresight: {
+						income: totalExpectedIncomeGroupedByCurrency[mainCurrency],
+						expense: totalExpectedExpenseGroupedByCurrency[mainCurrency],
+						total: resultGroupedByCurrencyForesight[mainCurrency],
+					},
 				};
 
 		CALCULATIONS[i] = {
+			month,
 			income,
 			expense,
 			assets: [],
 			incomesGroupedByCurrency,
 			totalExpectedIncomeGroupedByCurrency,
 			totalReceivedIncomeGroupedByCurrency,
-			totalRemainingIncomeGroupedByCurrency: Object.entries(
-				totalExpectedIncomeGroupedByCurrency,
-			).reduce(
+			totalRemainingIncomeGroupedByCurrency: Object.entries(totalExpectedIncomeGroupedByCurrency).reduce(
 				(acc, [currency, amount]) => {
-					acc[currency] =
-						amount - (totalReceivedIncomeGroupedByCurrency[currency] || 0);
+					acc[currency] = amount - (totalReceivedIncomeGroupedByCurrency[currency] || 0);
 					return acc;
 				},
 				{} as Record<string, number>,
@@ -625,12 +665,9 @@ export const getCalculations = ({
 			expensesGroupedByCurrency,
 			totalExpectedExpenseGroupedByCurrency,
 			totalPaidExpenseGroupedByCurrency,
-			totalRemainingExpenseGroupedByCurrency: Object.entries(
-				totalExpectedExpenseGroupedByCurrency,
-			).reduce(
+			totalRemainingExpenseGroupedByCurrency: Object.entries(totalExpectedExpenseGroupedByCurrency).reduce(
 				(acc, [currency, amount]) => {
-					acc[currency] =
-						amount - (totalPaidExpenseGroupedByCurrency[currency] || 0);
+					acc[currency] = amount - (totalPaidExpenseGroupedByCurrency[currency] || 0);
 					return acc;
 				},
 				{} as Record<string, number>,
@@ -640,19 +677,166 @@ export const getCalculations = ({
 				actual: resultGroupedByCurrency,
 				foresight: resultGroupedByCurrencyForesight,
 			},
-			hasAnyFullfilled,
 		};
 	}
+	// console.timeEnd("getCalculations");
 	return CALCULATIONS;
+};
+
+export const getCalculations_v2 = ({
+	rates,
+	viewportStartDate,
+	viewportEndDate,
+	populatedEntries,
+	groupFilters,
+	tagFilters,
+	mainCurrency,
+}: {
+	rates: Record<string, number>;
+	viewportStartDate: dayjs.Dayjs;
+	viewportEndDate: dayjs.Dayjs;
+	populatedEntries: TPopulatedEntry[];
+	groupFilters?: (TGroupId | "no-group")[];
+	tagFilters?: (TTagId | "no-tag")[];
+	mainCurrency: string;
+}) => {
+	// console.time("getCalculations_v2");
+	const CALC: TCALCULATIONS_OUTPUT_V2 = {};
+
+	let month: Dayjs = viewportStartDate;
+	const totalMonthCount = viewportEndDate.diff(viewportStartDate, "month");
+
+	if (groupFilters && groupFilters.length > 0) {
+		populatedEntries = populatedEntries.filter((entry) => groupFilters.includes(entry.details.groupId || "no-group"));
+	}
+
+	if (tagFilters && tagFilters.length > 0) {
+		populatedEntries = populatedEntries.filter((entry) => tagFilters.includes(entry.details.tagId || "no-tag"));
+	}
+
+	for (let i = 0; i <= totalMonthCount; i++) {
+		month = viewportStartDate.add(i, "month");
+		CALC[i] = {
+			month,
+			income: [],
+			expense: [],
+			assets: [],
+			grouped: {
+				income: {},
+				expense: {},
+			},
+			result: {
+				inMainCurrency: {
+					actual: {
+						income: 0,
+						expense: 0,
+						total: 0,
+					},
+					foresight: { income: 0, expense: 0, total: 0 },
+				},
+				actual: {},
+				foresight: {},
+			},
+		};
+
+		const monthEntries = populatedEntries.filter(
+			(e) => dayjs(e.date).month() === month.month() && dayjs(e.date).year() === month.year(),
+		);
+
+		const allUsedCurrencies = new Set<string>();
+
+		monthEntries.map((entry) => {
+			const currency = entry.details.currencyCode;
+			const type = entry.details.type;
+			const isFullfilled = !!entry.details.fullfilled;
+			const amount = Number(entry.details.amount);
+			const actualAmount = isFullfilled ? amount : 0;
+
+			CALC[i][type].push(entry);
+
+			allUsedCurrencies.add(currency);
+
+			CALC[i].grouped[type][currency] ??= {
+				entries: [],
+				expected: 0,
+				fullfilled: 0,
+				remaining: 0,
+			};
+
+			CALC[i].grouped[type][currency].entries.push(entry);
+			CALC[i].grouped[type][currency].expected += amount;
+			CALC[i].grouped[type][currency].fullfilled += isFullfilled ? amount : 0;
+			CALC[i].grouped[type][currency].remaining += isFullfilled ? 0 : amount;
+
+			CALC[i].result.actual[currency] ??= 0;
+			CALC[i].result.foresight[currency] ??= 0;
+
+			CALC[i].result.actual[currency] += actualAmount;
+			CALC[i].result.foresight[currency] += amount;
+
+			CALC[i].result.inMainCurrency.actual[type] += actualAmount;
+			CALC[i].result.inMainCurrency.foresight[type] += amount;
+		});
+
+		const isDifferentCurrencyUsed = Array.from(allUsedCurrencies).some((currency) => currency !== mainCurrency);
+
+		if (!isDifferentCurrencyUsed) {
+			CALC[i].result.inMainCurrency.actual.total =
+				CALC[i].result.inMainCurrency.actual.income - CALC[i].result.inMainCurrency.actual.expense;
+
+			CALC[i].result.inMainCurrency.foresight.total =
+				CALC[i].result.inMainCurrency.foresight.income - CALC[i].result.inMainCurrency.foresight.expense;
+		} else {
+			if (Object.keys(rates).length > 0) {
+				CALC[i].result.inMainCurrency.actual.income = Object.entries(CALC[i].grouped.income).reduce(
+					(acc, [currency, data]) => {
+						acc += data.fullfilled * rates[currency];
+						return acc;
+					},
+					0,
+				);
+
+				CALC[i].result.inMainCurrency.actual.expense = Object.entries(CALC[i].grouped.expense).reduce(
+					(acc, [currency, data]) => {
+						acc += data.fullfilled * rates[currency];
+						return acc;
+					},
+					0,
+				);
+
+				CALC[i].result.inMainCurrency.actual.total =
+					CALC[i].result.inMainCurrency.actual.income - CALC[i].result.inMainCurrency.actual.expense;
+
+				CALC[i].result.inMainCurrency.foresight.income = Object.entries(CALC[i].grouped.income).reduce(
+					(acc, [currency, data]) => {
+						acc += data.expected * rates[currency];
+						return acc;
+					},
+					0,
+				);
+
+				CALC[i].result.inMainCurrency.foresight.expense = Object.entries(CALC[i].grouped.expense).reduce(
+					(acc, [currency, data]) => {
+						acc += data.expected * rates[currency];
+						return acc;
+					},
+					0,
+				);
+
+				CALC[i].result.inMainCurrency.foresight.total =
+					CALC[i].result.inMainCurrency.foresight.income - CALC[i].result.inMainCurrency.foresight.expense;
+			}
+		}
+	}
+	// console.timeEnd("getCalculations_v2");
+	return CALC;
 };
 
 export type TCalculations = ReturnType<typeof getCalculations>;
 
 export function getEntries<T extends object>(obj: T) {
 	const mainCurrency = localStorage.getItem(storageKeys.mainCurrency) || "TRY";
-	return Object.entries(obj).length
-		? Object.entries(obj)
-		: [[mainCurrency, "0.00000000"]];
+	return Object.entries(obj).length ? Object.entries(obj) : [[mainCurrency, "0.00000000"]];
 }
 
 export function toggleFullfilled(entry: TPopulatedEntry) {
@@ -683,11 +867,7 @@ export function toggleFullfilled(entry: TPopulatedEntry) {
 	}
 }
 
-export async function deleteEntry(
-	entry: TPopulatedEntry,
-	withSubsequents = false,
-	onComplete: () => void = () => {},
-) {
+export async function deleteEntry(entry: TPopulatedEntry, withSubsequents = false, onComplete: () => void = () => {}) {
 	// if it's an exclusion
 	if (entry.exclusionId) {
 		evolu.update("exclusion", {
@@ -708,9 +888,7 @@ export async function deleteEntry(
 	}
 
 	if (withSubsequents && entry.recurringConfigId) {
-		const allExclusions = await evolu.loadQuery(
-			exclusionsQuery(entry.recurringConfigId),
-		);
+		const allExclusions = await evolu.loadQuery(exclusionsQuery(entry.recurringConfigId));
 
 		if (entry.index === 0) {
 			// we are deleting main entry, so delete recurring config also
@@ -805,9 +983,7 @@ export async function editEntry(
 	}
 
 	if (applyToSubsequents && entry.recurringConfigId && entry.config) {
-		const allExclusions = await evolu.loadQuery(
-			exclusionsQuery(entry.recurringConfigId),
-		);
+		const allExclusions = await evolu.loadQuery(exclusionsQuery(entry.recurringConfigId));
 
 		// if we are modifiying a main entry and there is no occurrences
 		// just update the main entry
@@ -857,9 +1033,7 @@ export async function editEntry(
 			startDate: entry.date,
 			endDate: entry.config.endDate,
 			every: entry.config.every || 1,
-			interval: entry.config.interval
-				? entry.config.interval - entry.index + 1
-				: 0,
+			interval: entry.config.interval ? entry.config.interval - entry.index + 1 : 0,
 		});
 
 		// new entry

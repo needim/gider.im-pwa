@@ -11,11 +11,7 @@ import { useLocalization } from "@/hooks/use-localization";
 import { useScreens } from "@/hooks/use-screens";
 import { cn } from "@/lib/utils";
 import type { TCalendarVision } from "@/types";
-import {
-	IconBinocularsFilled,
-	IconCashBanknoteFilled,
-	IconEyeFilled,
-} from "@tabler/icons-react";
+import { IconBinocularsFilled, IconCashBanknoteFilled, IconEyeFilled } from "@tabler/icons-react";
 
 export function CalendarVisionSelect() {
 	const { calendarVision, setCalendarVision } = useScreens();
@@ -60,12 +56,9 @@ export function CalendarVisionSelect() {
 					<activeMode.Icon
 						className={cn(
 							"size-5",
-							activeMode.colorCode === "zinc" &&
-								"text-zinc-600 dark:text-zinc-600",
-							activeMode.colorCode === "sky" &&
-								"text-sky-600 dark:text-sky-600",
-							activeMode.colorCode === "orange" &&
-								"text-orange-600 dark:text-orange-600",
+							activeMode.colorCode === "zinc" && "text-zinc-600 dark:text-zinc-600",
+							activeMode.colorCode === "sky" && "text-sky-600 dark:text-sky-600",
+							activeMode.colorCode === "orange" && "text-orange-600 dark:text-orange-600",
 						)}
 					/>
 				)}
@@ -87,19 +80,14 @@ export function CalendarVisionSelect() {
 										<mode.Icon
 											className={cn(
 												"size-7 absolute right-1",
-												mode.colorCode === "zinc" &&
-													"text-zinc-600 dark:text-zinc-600",
-												mode.colorCode === "sky" &&
-													"text-sky-600 dark:text-sky-600",
-												mode.colorCode === "orange" &&
-													"text-orange-600 dark:text-orange-600",
+												mode.colorCode === "zinc" && "text-zinc-600 dark:text-zinc-600",
+												mode.colorCode === "sky" && "text-sky-600 dark:text-sky-600",
+												mode.colorCode === "orange" && "text-orange-600 dark:text-orange-600",
 											)}
 										/>
 									)}
 								</div>
-								<p className="text-xs text-muted-foreground font-normal max-w-36 text-balance">
-									{mode.description}
-								</p>
+								<p className="text-xs text-muted-foreground font-normal max-w-36 text-balance">{mode.description}</p>
 							</div>
 						</DropdownMenuItem>
 						{index !== modes.length - 1 && <DropdownMenuSeparator />}

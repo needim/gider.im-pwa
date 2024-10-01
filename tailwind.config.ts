@@ -1,4 +1,3 @@
-import headlessui from "@headlessui/tailwindcss";
 import tailwindforms from "@tailwindcss/forms";
 import type { Config } from "tailwindcss";
 import tailwindanimate from "tailwindcss-animate";
@@ -95,7 +94,7 @@ const config = {
 			},
 		},
 	},
-	plugins: [tailwindanimate, headlessui, tailwindforms, displayModes],
+	plugins: [tailwindanimate, tailwindforms, displayModes],
 } satisfies Config;
 
 export default config;
