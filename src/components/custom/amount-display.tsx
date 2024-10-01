@@ -20,9 +20,7 @@ interface IAmountDisplay {
 	forceDecimal?: boolean;
 }
 
-export const AmountDisplay: React.FC<
-	React.PropsWithChildren<IAmountDisplay>
-> = ({
+export const AmountDisplay: React.FC<React.PropsWithChildren<IAmountDisplay>> = ({
 	amount,
 	currencyCode,
 	locale,
@@ -39,7 +37,7 @@ export const AmountDisplay: React.FC<
 	const { calendarVision } = useScreens();
 
 	if (calendarVision === "hidden" && !asString && useVision) {
-		return <span className="tracking-[-0.45rem]">﹡﹡﹡﹡﹡</span>;
+		return <span className="tracking-[0rem]">*****</span>;
 	}
 	amount = typeof amount === "string" ? Number.parseFloat(amount) : amount;
 	if (Number.isNaN(amount)) {
@@ -54,12 +52,7 @@ export const AmountDisplay: React.FC<
 		amount = amount > 0 ? amount : amount * -1;
 	}
 
-	const {
-		lang,
-		decimal,
-		tinyDecimal,
-		decimalMode: decimalModePref,
-	} = useLocalization();
+	const { lang, decimal, tinyDecimal, decimalMode: decimalModePref } = useLocalization();
 
 	const val = format(
 		amount,

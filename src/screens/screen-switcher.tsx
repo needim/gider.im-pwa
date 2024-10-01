@@ -1,7 +1,7 @@
 import IconMaintenance from "@/components/custom/v2/icons/maintenance";
 import { useScreens } from "@/hooks/use-screens";
 import { CalendarScreen } from "@/screens/calendar-screen";
-import { GraphsScreen } from "@/screens/graphs-screen";
+import { InsightsScreen } from "@/screens/insights-screen";
 import { SettingsScreen } from "@/screens/settings-screen";
 import { Suspense } from "react";
 
@@ -16,16 +16,15 @@ export function ScreenSwitcher() {
 						<div className="text-balance mx-20">
 							<IconMaintenance className="mx-auto mb-4 scale-75 -left-8 relative dark:invert" />
 							<div className="text-3xl font-bold mb-4">Assets</div>
-							<strong>In progress...</strong> <br /> You will add your assets to
-							keep track of your net worth.
+							<strong>In progress...</strong> <br /> You will add your assets to keep track of your net worth.
 						</div>
 					</div>
 				</Suspense>
 			);
-		case "graphs":
+		case "insights":
 			return (
 				<Suspense fallback={<div>Loading...</div>}>
-					<GraphsScreen />
+					<InsightsScreen />
 				</Suspense>
 			);
 		case "settings":

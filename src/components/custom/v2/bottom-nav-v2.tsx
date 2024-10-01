@@ -1,16 +1,8 @@
-import {
-	EntryDrawer,
-	type EntryDrawerRef,
-} from "@/components/custom/v2/entry-drawer";
-import { buttonVariants } from "@/components/ui/button.variants";
+import { EntryDrawer, type EntryDrawerRef } from "@/components/custom/v2/entry-drawer";
 import { useScreens } from "@/hooks/use-screens";
 import { cn } from "@/lib/utils";
 import type { TScreenId } from "@/types";
-import {
-	IconHexagonPlusFilled,
-	IconSettings,
-	IconSettingsFilled,
-} from "@tabler/icons-react";
+import { IconAdjustments, IconAdjustmentsFilled, IconHexagonPlusFilled } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { useRef } from "react";
 
@@ -59,8 +51,8 @@ export function BottomNavV2() {
 			),
 		},
 		{
-			title: "Graphs",
-			key: "graphs",
+			title: "Insights",
+			key: "insights",
 			presentation: "screen",
 			icon: (
 				<svg
@@ -104,14 +96,7 @@ export function BottomNavV2() {
 			presentation: "drawer",
 			icon: <></>, // never goes to active state, so no need for icon
 			passiveIcon: (
-				<div
-					className={cn(
-						buttonVariants({ size: "iconLarge" }),
-						"relative -top-3 rounded-2xl size-11",
-					)}
-				>
-					<IconHexagonPlusFilled className="size-7" />
-				</div>
+				<IconHexagonPlusFilled className="relative -top-3 rounded-2xl size-11 text-zinc-900 dark:text-zinc-300" />
 			),
 		},
 		{
@@ -158,8 +143,8 @@ export function BottomNavV2() {
 			title: "Settings",
 			key: "settings",
 			presentation: "screen",
-			icon: <IconSettingsFilled className="size-7 mb-6" />,
-			passiveIcon: <IconSettings className="size-7 mb-6" />,
+			icon: <IconAdjustmentsFilled className="size-7 mb-6" />,
+			passiveIcon: <IconAdjustments className="size-7 mb-6" />,
 		},
 	] satisfies Array<{
 		title: string;
@@ -182,17 +167,14 @@ export function BottomNavV2() {
 								type="button"
 								className={cn(
 									"inline-flex flex-col items-center justify-center px-5 hover:bg-zinc-50 dark:hover:bg-zinc-800 group pb-2 text-zinc-500 dark:text-zinc-500 group-hover:text-zinc-600 dark:group-hover:text-zinc-500 standalone:mt-1 pt-4",
-									activeScreen === item.key &&
-										"text-zinc-900 dark:text-zinc-300",
+									activeScreen === item.key && "text-zinc-900 dark:text-zinc-300",
 								)}
 								onClick={() => {
 									if (item.presentation === "screen") {
 										setScreen(item.key);
 									} else {
 										addTransactionRef.current?.openDrawer(
-											dayjs().isSame(calendarIndex, "month")
-												? dayjs()
-												: dayjs(calendarIndex),
+											dayjs().isSame(calendarIndex, "month") ? dayjs() : dayjs(calendarIndex),
 											calendarType,
 										);
 									}
