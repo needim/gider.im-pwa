@@ -96,10 +96,6 @@ export function MonthlyIncomeExpenseOverviewArea() {
 							/>
 						}
 					/>
-					{/* <ChartLegend content={<ChartLegendContent nameKey="income" />} /> */}
-
-					{/* <Bar dataKey="income" fill="var(--color-income)" radius={4} /> */}
-					{/* <Bar dataKey="expense" fill="var(--color-expense)" radius={4} /> */}
 
 					<defs>
 						<linearGradient id="fillIncome" x1="0" y1="0" x2="0" y2="1">
@@ -111,34 +107,31 @@ export function MonthlyIncomeExpenseOverviewArea() {
 							<stop offset="95%" stopColor="var(--color-expense)" stopOpacity={0.1} />
 						</linearGradient>
 						<linearGradient id="fillNet" x1="0" y1="0" x2="0" y2="1">
-							<stop offset="5%" stopColor="var(--color-expense)" stopOpacity={0.8} />
-							<stop offset="95%" stopColor="var(--color-expense)" stopOpacity={0.1} />
+							<stop offset="5%" stopColor="var(--color-net)" stopOpacity={0.8} />
+							<stop offset="95%" stopColor="var(--color-net)" stopOpacity={0.1} />
 						</linearGradient>
 					</defs>
 
 					<Area
 						dataKey="expense"
-						type="bump"
+						type="monotone"
 						fill="url(#fillExpense)"
 						fillOpacity={0.4}
 						stroke="var(--color-expense)"
-						stackId="a"
 					/>
-					<Area
-						dataKey="total"
-						type="bump"
+					{/* <Area
+						dataKey="net"
+						type="natural"
 						fill="url(#fillNet)"
 						fillOpacity={0.4}
-						stroke="var(--color-expense)"
-						stackId="a"
-					/>
+						stroke="var(--color-net)"
+					/> */}
 					<Area
 						dataKey="income"
-						type="bump"
+						type="monotone"
 						fill="url(#fillIncome)"
 						fillOpacity={0.4}
 						stroke="var(--color-income)"
-						stackId="a"
 					/>
 				</AreaChart>
 			</ChartContainer>
