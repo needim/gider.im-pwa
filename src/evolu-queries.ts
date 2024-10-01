@@ -771,8 +771,8 @@ export const getCalculations_v2 = ({
 			CALC[i].result.actual[currency] ??= 0;
 			CALC[i].result.foresight[currency] ??= 0;
 
-			CALC[i].result.actual[currency] += actualAmount;
-			CALC[i].result.foresight[currency] += amount;
+			CALC[i].result.actual[currency] += type === "expense" ? -1 * actualAmount : actualAmount;
+			CALC[i].result.foresight[currency] += type === "expense" ? -1 * amount : amount;
 
 			CALC[i].result.inMainCurrency.actual[type] += actualAmount;
 			CALC[i].result.inMainCurrency.foresight[type] += amount;
