@@ -3,7 +3,7 @@ import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } f
 import { useLocalization } from "@/hooks/use-localization";
 import { useScreens } from "@/hooks/use-screens";
 import dayjs from "dayjs";
-import { Area, AreaChart, XAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 export function MonthlyIncomeExpenseOverviewArea() {
 	const { CALCULATIONS, calendarVision } = useScreens();
@@ -70,7 +70,7 @@ export function MonthlyIncomeExpenseOverviewArea() {
 						right: 10,
 					}}
 				>
-					{/* <CartesianGrid vertical={false} /> */}
+					<CartesianGrid strokeOpacity={0.5} vertical={true} />
 					<XAxis
 						dataKey="month"
 						tickLine={false}
