@@ -137,5 +137,18 @@
 	"Hidden": "Hidden",
 	"HiddenDescription": "Hides all amounts and balances.",
 	"DisplayModes": "Calculation mode",
-	"NumberFormat": "Number format"
+	"NumberFormat": "Number format",
+	"PrivateKey": "Private key",
+	"PrivateKeyDescription": "Your private key is the key used to sync your data. Keep it secret and secure at all times.",
+	"Hide": "Hide",
+	"Reveal": "Reveal",
+	"Copy": "Copy",
+	"Copied": "Copied",
+	"View": "View",
+	"Erase": "Erase",
+	"ViewPrivateKey": "Private key",
+	"EraseData": "Erase data",
+	"AreYouSure": "Are you absolutely sure?",
+	"ThisActionCantBeUndone": "This action can't be undone.",
+	"EraseAllDataAndStartOver": "Erase all data and start over"
 }

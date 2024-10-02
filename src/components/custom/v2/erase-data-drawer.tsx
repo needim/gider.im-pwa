@@ -9,6 +9,7 @@ import {
 	DrawerTitle,
 } from "@/components/ui/drawer";
 import { evolu } from "@/evolu-db";
+import { useLocalization } from "@/hooks/use-localization";
 import { IconTrashXFilled } from "@tabler/icons-react";
 import { forwardRef, useImperativeHandle, useState } from "react";
 
@@ -19,7 +20,7 @@ export interface EraseDataDrawerRef {
 
 export const EraseDataDrawer = forwardRef<EraseDataDrawerRef, {}>((_, ref) => {
 	const [open, setOpen] = useState(false);
-	// const { m } = useLocalization();
+	const { m } = useLocalization();
 
 	useImperativeHandle(ref, () => ({
 		openDrawer: () => {
@@ -34,9 +35,9 @@ export const EraseDataDrawer = forwardRef<EraseDataDrawerRef, {}>((_, ref) => {
 		<Drawer open={open} onOpenChange={setOpen}>
 			<DrawerContent className="pb-6 max-w-md mx-auto">
 				<DrawerHeader>
-					<IconTrashXFilled className="text-red-500 w-12 h-12 mx-auto mb-2" />
-					<DrawerTitle>Are you absolutely sure?</DrawerTitle>
-					<DrawerDescription>This action cannot be undone.</DrawerDescription>
+					<IconTrashXFilled className="text-orange-600 w-12 h-12 mx-auto mb-2" />
+					<DrawerTitle>{m.AreYouSure()}</DrawerTitle>
+					<DrawerDescription>{m.ThisActionCantBeUndone()}</DrawerDescription>
 				</DrawerHeader>
 				<DrawerFooter>
 					<Button
@@ -48,7 +49,7 @@ export const EraseDataDrawer = forwardRef<EraseDataDrawerRef, {}>((_, ref) => {
 							window.location.reload();
 						}}
 					>
-						Erase all data and start over
+						{m.EraseAllDataAndStartOver()}
 					</Button>
 				</DrawerFooter>
 			</DrawerContent>

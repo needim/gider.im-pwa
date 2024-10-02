@@ -9,6 +9,7 @@ import {
 import { TagDrawer, type TagDrawerRef } from "@/components/custom/tag-drawer";
 import { ThemeToggle } from "@/components/custom/theme-toggle";
 import { EraseDataDrawer, type EraseDataDrawerRef } from "@/components/custom/v2/erase-data-drawer";
+import { PrivateKeyDrawer, type PrivateKeyDrawerRef } from "@/components/custom/v2/private-key-drawer";
 import { Button } from "@/components/ui/button";
 import { useLocalization } from "@/hooks/use-localization";
 import { cn, storageKeys } from "@/lib/utils";
@@ -16,6 +17,7 @@ import {
 	IconCashBanknoteFilled,
 	IconCategoryFilled,
 	IconChevronRight,
+	IconCircleKeyFilled,
 	IconContrastFilled,
 	IconCurrencyCent,
 	IconEyeFilled,
@@ -52,6 +54,7 @@ export function SettingsScreen() {
 	const groupDrawerRef = useRef<GroupDrawerRef>(null);
 	const tagDrawerRef = useRef<TagDrawerRef>(null);
 	const eraseDataDrawerRef = useRef<EraseDataDrawerRef>(null);
+	const privateKeyDrawerRef = useRef<PrivateKeyDrawerRef>(null);
 	const sponsorsEnabled = false;
 	return (
 		<>
@@ -153,7 +156,19 @@ export function SettingsScreen() {
 										Export <IconChevronRight className="size-4 ml-1  relative -mr-1" />
 									</Button>
 								</SettingsRow> */}
-								<SettingsRow Icon={IconTrashXFilled} iconBackground="bg-red-500" title="Erase data">
+								<SettingsRow Icon={IconCircleKeyFilled} iconBackground="bg-pink-500" title={m.ViewPrivateKey()}>
+									<Button
+										size="sm"
+										variant="outline"
+										className="rounded"
+										onClick={() => {
+											privateKeyDrawerRef.current?.openDrawer();
+										}}
+									>
+										{m.View()} <IconChevronRight className="size-4 ml-1  relative -mr-1" />
+									</Button>
+								</SettingsRow>
+								<SettingsRow Icon={IconTrashXFilled} iconBackground="bg-red-500" title={m.EraseData()}>
 									<Button
 										size="sm"
 										variant="outline"
@@ -162,7 +177,7 @@ export function SettingsScreen() {
 											eraseDataDrawerRef.current?.openDrawer();
 										}}
 									>
-										Erase <IconChevronRight className="size-4 ml-1  relative -mr-1" />
+										{m.Erase()} <IconChevronRight className="size-4 ml-1  relative -mr-1" />
 									</Button>
 								</SettingsRow>
 							</div>
@@ -399,6 +414,7 @@ export function SettingsScreen() {
 			<GroupDrawer ref={groupDrawerRef} />
 			<TagDrawer ref={tagDrawerRef} />
 			<EraseDataDrawer ref={eraseDataDrawerRef} />
+			<PrivateKeyDrawer ref={privateKeyDrawerRef} />
 		</>
 	);
 }

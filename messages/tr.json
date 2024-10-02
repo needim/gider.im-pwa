@@ -137,5 +137,18 @@
 	"Hidden": "Gizli",
 	"HiddenDescription": "Tüm tutarları ve bakiyeleri gizler.",
 	"DisplayModes": "Hesaplama metodu",
-	"NumberFormat": "Sayı formatı"
+	"NumberFormat": "Sayı formatı",
+	"PrivateKey": "Kişisel anahtar",
+	"PrivateKeyDescription": "Kişisel anahtarınız verilerinizi senkronize etmek için kullanılan anahtardır. Bunu her zaman gizli ve güvende tutun.",
+	"Hide": "Gizle",
+	"Reveal": "Göster",
+	"Copy": "Kopyala",
+	"Copied": "Kopyalandı",
+	"View": "Görüntüle",
+	"Erase": "Sil",
+	"ViewPrivateKey": "Kişisel anahtar",
+	"EraseData": "Verileri sil",
+	"AreYouSure": "Gerçekten emin misiniz?",
+	"ThisActionCantBeUndone": "Bu işlem geri alınamaz.",
+	"EraseAllDataAndStartOver": "Tüm verileri sil ve yeniden başla"
 }
