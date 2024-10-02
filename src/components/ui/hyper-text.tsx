@@ -19,7 +19,7 @@ const getRandomInt = (max: number) => Math.floor(Math.random() * max);
 
 export default function HyperText({
 	text,
-	duration = 1000,
+	duration = 3000,
 	framerProps = {
 		initial: { opacity: 0, y: -10 },
 		animate: { opacity: 1, y: 0 },
