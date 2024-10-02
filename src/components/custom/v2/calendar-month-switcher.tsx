@@ -46,9 +46,9 @@ export function CalendarMonthSwitcher(): React.ReactElement {
 					>
 						<span className={cn("flex items-center pr-2 rounded-full h-7", isViewingCurrentMonth ? "pl-2" : "")}>
 							{!isViewingCurrentMonth && (
-								<Button size="iconXs" variant="default" className="rounded-full size-[27px] mr-1.5">
-									<IconRestore className="size-4" />
-								</Button>
+								// <Button size="iconXs" variant="default" className="rounded-full size-7 mr-1.5">
+								<IconRestore className="size-4 mr-1.5" />
+								// </Button>
 							)}
 							<span>{dayjs(new Date(calendarIndex)).format("MMMM, YYYY")}</span>
 						</span>

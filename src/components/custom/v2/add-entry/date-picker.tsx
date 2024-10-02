@@ -1,9 +1,5 @@
 import { Calendar } from "@/components/ui/calendar";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export function DatePicker({
 	children,
@@ -25,7 +21,6 @@ export function DatePicker({
 					onSelect={onValueChange}
 					initialFocus
 					weekStartsOn={1}
-					// locale={}
 				/>
 			</PopoverContent>
 		</Popover>

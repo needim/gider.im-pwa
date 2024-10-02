@@ -1,8 +1,5 @@
 import { AmountDisplay } from "@/components/custom/amount-display";
-import {
-	GroupDrawer,
-	type GroupDrawerRef,
-} from "@/components/custom/group-drawer";
+import { GroupDrawer, type GroupDrawerRef } from "@/components/custom/group-drawer";
 import {
 	DecimalModeSelector,
 	DecimalSelector,
@@ -11,31 +8,41 @@ import {
 } from "@/components/custom/settings";
 import { TagDrawer, type TagDrawerRef } from "@/components/custom/tag-drawer";
 import { ThemeToggle } from "@/components/custom/theme-toggle";
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from "@/components/ui/accordion";
+import { EraseDataDrawer, type EraseDataDrawerRef } from "@/components/custom/v2/erase-data-drawer";
 import { Button } from "@/components/ui/button";
-import { evolu } from "@/evolu-db";
 import { useLocalization } from "@/hooks/use-localization";
-import { storageKeys } from "@/lib/utils";
+import { cn, storageKeys } from "@/lib/utils";
 import {
-	IconAlertCircleFilled,
+	IconCashBanknoteFilled,
+	IconCategoryFilled,
 	IconChevronRight,
+	IconContrastFilled,
+	IconCurrencyCent,
+	IconEyeFilled,
 	IconHeartFilled,
+	IconLanguageHiragana,
+	IconNumber123,
+	IconTagsFilled,
+	IconTrashXFilled,
+	type TablerIcon,
 } from "@tabler/icons-react";
 import type React from "react";
 import { useRef } from "react";
 
 function SettingsRow({
 	title,
+	Icon,
+	iconBackground,
 	children,
-}: { title: string; children: React.ReactNode }) {
+}: { title: string; Icon: TablerIcon; iconBackground: string; children: React.ReactNode }) {
 	return (
 		<div className="flex items-center justify-between min-h-9 text-sm">
-			<h1 className="flex items-center font-medium">{title}</h1>
+			<h1 className="flex items-center text-base font-medium gap-2">
+				<div className={cn("size-6 bg-zinc-400 rounded-xs flex items-center justify-center", iconBackground)}>
+					<Icon className={cn("size-4 text-white")} />
+				</div>
+				{title}
+			</h1>
 			<div>{children}</div>
 		</div>
 	);
@@ -44,7 +51,8 @@ export function SettingsScreen() {
 	const { mainCurrency, m, decimalMode } = useLocalization();
 	const groupDrawerRef = useRef<GroupDrawerRef>(null);
 	const tagDrawerRef = useRef<TagDrawerRef>(null);
-	const sponsorsEnabled = true;
+	const eraseDataDrawerRef = useRef<EraseDataDrawerRef>(null);
+	const sponsorsEnabled = false;
 	return (
 		<>
 			<div className="flex-1 h-svh overflow-y-auto py-4 relative">
@@ -53,25 +61,30 @@ export function SettingsScreen() {
 
 					<div className="flex flex-col gap-6 mb-4">
 						<div>
-							<h1 className="text-xs text-zinc-400 dark:text-zinc-600 uppercase font-bold mb-1">
-								{m.Currency()}
-							</h1>
+							<h1 className="text-xs text-zinc-400 dark:text-zinc-600 uppercase font-bold mb-1">{m.General()}</h1>
+							<div className="rounded px-2 -mx-2 text-sm flex flex-col gap-1">
+								<SettingsRow Icon={IconContrastFilled} iconBackground="bg-sky-500" title={m.Theme()}>
+									<ThemeToggle />
+								</SettingsRow>
+								<SettingsRow Icon={IconLanguageHiragana} iconBackground="bg-orange-500" title={m.Localization()}>
+									<LanguageSelector />
+								</SettingsRow>
+							</div>
+						</div>
+
+						<div>
+							<h1 className="text-xs text-zinc-400 dark:text-zinc-600 uppercase font-bold mb-1">{m.Currency()}</h1>
 							<div className=" rounded px-2 -mx-2 text-sm flex flex-col gap-1">
-								<SettingsRow title={m.MainCurrency()}>
+								<SettingsRow Icon={IconCashBanknoteFilled} iconBackground="bg-green-500" title={m.MainCurrency()}>
 									<MainCurrencySelector />
 								</SettingsRow>
-								<SettingsRow title={m.DecimalLength()}>
+								<SettingsRow Icon={IconCurrencyCent} iconBackground="bg-teal-500" title={m.DecimalLength()}>
 									<DecimalSelector />
 								</SettingsRow>
-								{/* {decimal > 0 && (
-            <SettingsRow title={m.TinyDecimals()}>
-            <TinyDecimalSelector />
-            </SettingsRow>
-            )} */}
-								<SettingsRow title={m.NumberFormat()}>
+								<SettingsRow Icon={IconNumber123} iconBackground="bg-cyan-600" title={m.NumberFormat()}>
 									<DecimalModeSelector />
 								</SettingsRow>
-								<SettingsRow title={m.Preview()}>
+								<SettingsRow Icon={IconEyeFilled} iconBackground="bg-zinc-500" title={m.Preview()}>
 									<AmountDisplay
 										amount={"12345678"}
 										currencyCode={mainCurrency}
@@ -84,11 +97,9 @@ export function SettingsScreen() {
 						</div>
 
 						<div>
-							<h1 className="text-xs text-zinc-400 dark:text-zinc-600 uppercase font-bold mb-1">
-								{m.GroupsAndTags()}
-							</h1>
+							<h1 className="text-xs text-zinc-400 dark:text-zinc-600 uppercase font-bold mb-1">{m.GroupsAndTags()}</h1>
 							<div className="px-2 -mx-2 text-sm flex flex-col gap-1">
-								<SettingsRow title={m.Groups()}>
+								<SettingsRow Icon={IconCategoryFilled} iconBackground="bg-fuchsia-500" title={m.Groups()}>
 									<Button
 										size="sm"
 										variant="outline"
@@ -97,11 +108,10 @@ export function SettingsScreen() {
 											groupDrawerRef.current?.openDrawer();
 										}}
 									>
-										{m.Manage()}{" "}
-										<IconChevronRight className="size-4 ml-1  relative -mr-1" />
+										{m.Manage()} <IconChevronRight className="size-4 ml-1  relative -mr-1" />
 									</Button>
 								</SettingsRow>
-								<SettingsRow title={m.Tags()}>
+								<SettingsRow Icon={IconTagsFilled} iconBackground="bg-indigo-500" title={m.Tags()}>
 									<Button
 										size="sm"
 										variant="outline"
@@ -110,23 +120,50 @@ export function SettingsScreen() {
 											tagDrawerRef.current?.openDrawer();
 										}}
 									>
-										{m.Manage()}{" "}
-										<IconChevronRight className="size-4 ml-1 relative -mr-1" />
+										{m.Manage()} <IconChevronRight className="size-4 ml-1 relative -mr-1" />
 									</Button>
 								</SettingsRow>
 							</div>
 						</div>
 
 						<div>
-							<h1 className="text-xs text-zinc-400 dark:text-zinc-600 uppercase font-bold mb-1">
-								{m.General()}
-							</h1>
-							<div className=" rounded px-2 -mx-2 text-sm flex flex-col gap-1">
-								<SettingsRow title={m.Theme()}>
-									<ThemeToggle />
+							<h1 className="text-xs text-zinc-400 dark:text-zinc-600 uppercase font-bold mb-1">Data</h1>
+							<div className="px-2 -mx-2 text-sm flex flex-col gap-1">
+								{/* <SettingsRow Icon={IconSquareArrowDownFilled} iconBackground="bg-lime-500" title="Import data">
+									<Button
+										size="sm"
+										variant="outline"
+										className="rounded"
+										onClick={() => {
+											// tagDrawerRef.current?.openDrawer();
+										}}
+									>
+										Import <IconChevronRight className="size-4 ml-1  relative -mr-1" />
+									</Button>
 								</SettingsRow>
-								<SettingsRow title={m.Localization()}>
-									<LanguageSelector />
+								<SettingsRow Icon={IconSquareArrowUpFilled} iconBackground="bg-pink-500" title="Export data">
+									<Button
+										size="sm"
+										variant="outline"
+										className="rounded"
+										onClick={() => {
+											// tagDrawerRef.current?.openDrawer();
+										}}
+									>
+										Export <IconChevronRight className="size-4 ml-1  relative -mr-1" />
+									</Button>
+								</SettingsRow> */}
+								<SettingsRow Icon={IconTrashXFilled} iconBackground="bg-red-500" title="Erase data">
+									<Button
+										size="sm"
+										variant="outline"
+										className="rounded"
+										onClick={() => {
+											eraseDataDrawerRef.current?.openDrawer();
+										}}
+									>
+										Erase <IconChevronRight className="size-4 ml-1  relative -mr-1" />
+									</Button>
 								</SettingsRow>
 							</div>
 						</div>
@@ -168,12 +205,7 @@ export function SettingsScreen() {
 													className="max-h-12 w-full object-contain filter grayscale transition-all dark:invert duration-300"
 													xmlns="http://www.w3.org/2000/svg"
 												>
-													<rect
-														width={440}
-														height={440}
-														rx={96}
-														fill="#1E293B"
-													/>
+													<rect width={440} height={440} rx={96} fill="#1E293B" />
 													<path
 														d="M226 100c0-13.255 10.745-24 24-24h56c13.255 0 24 10.745 24 24v104H226V100z"
 														fill="url(#prefix__paint0_linear_1_2)"
@@ -199,11 +231,7 @@ export function SettingsScreen() {
 														>
 															<stop stopColor="#fff" stopOpacity={0.8} />
 															<stop offset={0} stopColor="#fff" />
-															<stop
-																offset={0.867}
-																stopColor="#fff"
-																stopOpacity={0}
-															/>
+															<stop offset={0.867} stopColor="#fff" stopOpacity={0} />
 														</linearGradient>
 													</defs>
 												</svg>
@@ -329,53 +357,7 @@ export function SettingsScreen() {
 						</>
 					)}
 
-					<div className="-mx-4">
-						<Accordion type="single" collapsible className="w-full">
-							<AccordionItem value="danger-zone">
-								<AccordionTrigger className="px-4 bg-[#FBE7E8] dark:bg-[#4F1213] text-red-700 dark:text-red-300">
-									Danger zone
-								</AccordionTrigger>
-								<AccordionContent>
-									<div className="rounded-none bg-red-50 dark:bg-red-950 p-6 relative overflow-hidden">
-										<div className="flex">
-											<div className="flex-shrink-0 absolute -top-16 -mt-1.5 -right-16 rotate-12 opacity-5 pointer-events-none">
-												<IconAlertCircleFilled
-													className="size-80 text-red-700 dark:text-red-300"
-													aria-hidden="true"
-												/>
-											</div>
-											<div>
-												<h3 className="text-sm font-medium text-red-700 dark:text-red-300">
-													{m.ClearAllEntries()}
-												</h3>
-												<div className="mt-2 text-sm text-red-800 dark:text-red-400">
-													<ul className="list-disc space-y-1 pl-5">
-														<li>{m.YouWillLoseAllData()}</li>
-														<li>{m.ThisIsNotReversible()}</li>
-														<li>{m.PleaseBeSure()}</li>
-													</ul>
-												</div>
-											</div>
-										</div>
-										<Button
-											variant="destructive"
-											className="mt-4"
-											size="sm"
-											onClick={async () => {
-												await evolu.resetOwner({ reload: false });
-												window.localStorage.clear();
-												window.location.reload();
-											}}
-										>
-											{m.DeleteAllData()}
-										</Button>
-									</div>
-								</AccordionContent>
-							</AccordionItem>
-						</Accordion>
-					</div>
-
-					<div className="text-muted-foreground text-xs mt-4 flex items-center gap-2 justify-center">
+					<div className="text-muted-foreground text-xs mt-8 flex items-center gap-2 justify-center">
 						<span>gider.im v{__APP_VERSION__}</span>
 						<span>•</span>
 						<p>
@@ -416,6 +398,7 @@ export function SettingsScreen() {
 			</div>
 			<GroupDrawer ref={groupDrawerRef} />
 			<TagDrawer ref={tagDrawerRef} />
+			<EraseDataDrawer ref={eraseDataDrawerRef} />
 		</>
 	);
 }
