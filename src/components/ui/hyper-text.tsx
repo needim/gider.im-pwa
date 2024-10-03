@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, type Variants, motion } from "framer-motion";
+import { type Variants, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -60,17 +60,11 @@ export default function HyperText({
 
 	return (
 		<pre className="overflow-hidden py-2 text-balance cursor-default scale-100">
-			<AnimatePresence mode="wait">
-				{displayText.map((letter, i) => (
-					<motion.h1
-						key={i}
-						className={cn("font-mono inline", letter === " " ? "w-3" : "", className)}
-						{...framerProps}
-					>
-						{letter}
-					</motion.h1>
-				))}
-			</AnimatePresence>
+			{displayText.map((letter, i) => (
+				<motion.h1 key={i} className={cn("font-mono inline", letter === " " ? "w-3" : "", className)} {...framerProps}>
+					{letter}
+				</motion.h1>
+			))}
 		</pre>
 	);
 }

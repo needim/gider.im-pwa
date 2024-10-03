@@ -10,24 +10,13 @@ import {
 	table,
 } from "@evolu/react";
 
-export const NonEmptyString100 = SqliteString.pipe(
-	S.minLength(1),
-	S.maxLength(100),
-	S.brand("NonEmptyString100"),
-);
+export const NonEmptyString100 = SqliteString.pipe(S.minLength(1), S.maxLength(100), S.brand("NonEmptyString100"));
 export type TNonEmptyString100 = typeof NonEmptyString100.Type;
 
-export const CurrencyIsoString = SqliteString.pipe(
-	S.minLength(3),
-	S.maxLength(3),
-	S.brand("CurrencyIsoString"),
-);
+export const CurrencyIsoString = SqliteString.pipe(S.minLength(3), S.maxLength(3), S.brand("CurrencyIsoString"));
 export type TCurrencyIsoString = typeof CurrencyIsoString.Type;
 
-export const AmountString = SqliteString.pipe(
-	S.pattern(/^\d+\.\d{8}$/),
-	S.brand("AmountString"),
-);
+export const AmountString = SqliteString.pipe(S.pattern(/^\d+\.\d{8}$/), S.brand("AmountString"));
 export type TAmountString = typeof AmountString.Type;
 
 // Branded Ids
@@ -100,9 +89,7 @@ export const EvoluDB = database({
 });
 
 // TODO: Add indexes
-const indexes = createIndexes((create) => [
-	create("indexEntryByDate").on("entry").column("date"),
-]);
+const indexes = createIndexes((create) => [create("indexEntryByDate").on("entry").column("date")]);
 
 const decode = S.decodeSync;
 const decodeName = S.decodeSync(NonEmptyString100);
@@ -114,54 +101,15 @@ const decodeTagId = S.decodeSync(TagId);
 
 export const evolu = createEvolu(EvoluDB, {
 	// minimumLogLevel: "trace",
+	// name: "gider.im",
 	indexes,
-	...(process.env.NODE_ENV === "development" && {
-		syncUrl: "http://localhost:4000",
-	}),
-	initialData: (_db) => {
-		// const recurring = _db.create("recurringConfig", {
-		// 	frequency: "month",
-		// 	interval: 12,
-		// 	every: 2,
-		// 	startDate: new Date("2024-09-01"),
-		// 	endDate: new Date("2025-09-01"),
-		// });
-		// _db.create("entry", {
-		// 	name: decodeName("2 month for 1 year"),
-		// 	type: "income",
-		// 	amount: decodeAmount("1000.00000000"),
-		// 	fullfilled: false,
-		// 	date: new Date("2024-09-01"),
-		// 	currencyCode: decodeCurrency("USD"),
-		// 	recurringId: recurring.id,
-		// });
-		// const recurring2 = db.create("recurringConfig", {
-		// 	frequency: "month",
-		// 	interval: 0,
-		// 	startDate: new Date("2024-01-01"),
-		// });
-		// db.create("entry", {
-		// 	name: decodeName("Rent"),
-		// 	type: "expense",
-		// 	amount: decodeAmount("500.00000000"),
-		// 	fullfilled: false,
-		// 	date: new Date("2024-01-01"),
-		// 	currencyCode: decodeCurrency("USD"),
-		// 	recurringId: recurring2.id,
-		// });
-	},
+	// ...(process.env.NODE_ENV === "development" && {
+	// 	syncUrl: "http://localhost:4000",
+	// }),
+	// enableWebsocketConnection: true,
 });
 
 export type TEvoluDB = typeof EvoluDB.Type;
 export type TEntryTable = typeof EntryTable.Type;
 
-export {
-	S,
-	decode,
-	decodeAmount,
-	decodeCurrency,
-	decodeDate,
-	decodeGroupId,
-	decodeName,
-	decodeTagId,
-};
+export { S, decode, decodeAmount, decodeCurrency, decodeDate, decodeGroupId, decodeName, decodeTagId };

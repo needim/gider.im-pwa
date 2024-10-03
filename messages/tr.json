@@ -150,5 +150,15 @@
 	"EraseData": "Verileri sil",
 	"AreYouSure": "Gerçekten emin misiniz?",
 	"ThisActionCantBeUndone": "Bu işlem geri alınamaz.",
-	"EraseAllDataAndStartOver": "Tüm verileri sil ve yeniden başla"
+	"EraseAllDataAndStartOver": "Tüm verileri bu cihazdan sil",
+	"RestoreData": "Verileri geri yükle",
+	"Restore": "Geri yükle",
+	"Restoring": "Geri yükleniyor...",
+	"RestoreWithPrivateKey": "Kişisel anahtar ile geri yükle",
+	"RestoreWithPrivateKeyDesc": "Verilerinizi kişisel anahtarınızla geri yükleyebilirsiniz.",
+	"PasteYourPrivateKeyHere": "Kişisel anahtarınızı buraya yapıştırın",
+	"InvalidPrivateKey": "⚠ Geçersiz kişisel anahtar",
+	"PleaseEnterValidPrivateKey": "Lütfen geçerli bir kişisel anahtar girin",
+	"ExportData": "Verileri dışa aktar",
+	"Export": "Dışa aktar"
 }

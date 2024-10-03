@@ -62,7 +62,7 @@ export const PrivateKeyDrawer = forwardRef<PrivateKeyDrawerRef, {}>((_, ref) => 
 					<DrawerDescription className="text-balance">{m.PrivateKeyDescription()}</DrawerDescription>
 				</DrawerHeader>
 				<motion.div
-					className="mx-12 border rounded bg-input"
+					className="mx-4 border rounded bg-input border-input"
 					initial={{ height: 0, scale: 0, opacity: 0 }}
 					animate={reveal ? { height: "auto", scale: 1, opacity: 1 } : { height: 0, scale: 0, opacity: 0 }}
 				>

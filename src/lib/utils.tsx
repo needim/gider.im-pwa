@@ -1,5 +1,8 @@
 import type { TDecimalMode } from "@/providers/localization";
 import type { Theme } from "@/providers/theme";
+import type { Mnemonic } from "@evolu/react";
+import * as bip39 from "@scure/bip39";
+import { wordlist } from "@scure/bip39/wordlists/english";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -287,17 +290,15 @@ export const STAGGER_CHILD_VARIANTS = {
 	show: { opacity: 1, y: 0, transition: { duration: 0.25, type: "spring" } },
 };
 
+export const validateMnemonic = (mnemonic: string) => {
+	const mnemonicTrimmed = mnemonic.trim();
+	return bip39.validateMnemonic(mnemonicTrimmed, wordlist) ? (mnemonicTrimmed as Mnemonic) : null;
+};
+
 export function setThemeColor(theme: Theme) {
-	const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
-		? "#09090B"
-		: "white";
-
-	const themeColor =
-		theme === "system" ? systemTheme : theme === "light" ? "white" : "#09090B";
-
-	document
-		.querySelector('meta[name="theme-color"]')
-		?.setAttribute("content", themeColor);
+	const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "#09090B" : "white";
+	const themeColor = theme === "system" ? systemTheme : theme === "light" ? "white" : "#09090B";
+	document.querySelector('meta[name="theme-color"]')?.setAttribute("content", themeColor);
 }
 
 export const format = (
@@ -397,12 +398,7 @@ export const format = (
 	}
 };
 
-export const formatRate = (
-	value: number,
-	digits: number,
-	smallDigits: number,
-	locale?: string,
-) => {
+export const formatRate = (value: number, digits: number, smallDigits: number, locale?: string) => {
 	const safeDigits = Number.isNaN(digits) ? 2 : digits;
 	const result = new Intl.NumberFormat(locale || BROWSER_LOCALE, {
 		minimumFractionDigits: safeDigits,
@@ -419,13 +415,8 @@ export const formatRate = (
 			return (
 				<span>
 					{result.substring(0, decimalIndex + 1)}
-					{result.substring(
-						decimalIndex + 1,
-						decimalIndex + 1 + (safeDigits - smallDigits),
-					)}
-					<small>
-						{result.substring(decimalIndex + 1 + (safeDigits - smallDigits))}
-					</small>
+					{result.substring(decimalIndex + 1, decimalIndex + 1 + (safeDigits - smallDigits))}
+					<small>{result.substring(decimalIndex + 1 + (safeDigits - smallDigits))}</small>
 				</span>
 			);
 		}

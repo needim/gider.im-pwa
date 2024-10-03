@@ -1,7 +1,4 @@
-import {
-	EntryEditDialog,
-	type EntryEditDialogRef,
-} from "@/components/custom/entry-edit-dialog";
+import { EntryEditDialog, type EntryEditDialogRef } from "@/components/custom/entry-edit-dialog";
 import { EntryRow } from "@/components/custom/entry-row";
 import IconEntriesEmptyState from "@/components/custom/v2/icons/entries-empty-state";
 import { useLocalization } from "@/hooks/use-localization";
@@ -19,12 +16,11 @@ export function CalendarScreen(): React.ReactElement {
 	// const addTransactionRef = useRef<EntryDrawerRef>(null);
 	const editDialogRef = useRef<EntryEditDialogRef>(null);
 
-	const showEmptyState =
-		CALCULATIONS[viewingIndex]?.[calendarType].length === 0;
+	const showEmptyState = CALCULATIONS[viewingIndex]?.[calendarType].length === 0;
 
 	return (
 		<>
-			<div className="flex-1 h-svh overflow-y-auto pb-4 relative">
+			<div className="flex-1 h-svh overflow-y-auto relative">
 				{showEmptyState && (
 					<IconEntriesEmptyState className="absolute dark:invert dark:opacity-80 size-[50%] left-1/2 -translate-x-1/2 top-1/2 -translate-y-3/4 -ml-3" />
 				)}
@@ -32,9 +28,7 @@ export function CalendarScreen(): React.ReactElement {
 					<div className="flex-1 absolute w-full bottom-4 items-center pointer-events-none">
 						<div className="text-center">
 							<h3 className="mt-2 text-sm font-semibold">{m.NoEntries()}</h3>
-							<p className="mt-1 text-sm text-muted-foreground text-balance">
-								{m.ClickToAdd()}
-							</p>
+							<p className="mt-1 text-sm text-muted-foreground text-balance">{m.ClickToAdd()}</p>
 							<motion.div
 								className="mx-auto text-center mt-4"
 								animate={{ y: 5 }}
@@ -51,11 +45,7 @@ export function CalendarScreen(): React.ReactElement {
 					</div>
 				)}
 				{CALCULATIONS[viewingIndex]?.[calendarType]?.map((t, i) => (
-					<EntryRow
-						key={`${i}-${t.id}-${t.recurringConfigId}`}
-						entry={t}
-						editDialogRef={editDialogRef}
-					/>
+					<EntryRow key={`${i}-${t.id}-${t.recurringConfigId}`} entry={t} editDialogRef={editDialogRef} />
 				))}
 			</div>
 

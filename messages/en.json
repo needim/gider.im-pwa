@@ -150,5 +150,15 @@
 	"EraseData": "Erase data",
 	"AreYouSure": "Are you absolutely sure?",
 	"ThisActionCantBeUndone": "This action can't be undone.",
-	"EraseAllDataAndStartOver": "Erase all data and start over"
+	"EraseAllDataAndStartOver": "Erase all data from this device",
+	"RestoreData": "Restore data",
+	"Restore": "Restore",
+	"Restoring": "Restoring...",
+	"RestoreWithPrivateKey": "Restore with Private Key",
+	"RestoreWithPrivateKeyDesc": "You can restore your data with your private key.",
+	"PasteYourPrivateKeyHere": "Paste your private key here",
+	"InvalidPrivateKey": "⚠ Invalid private key",
+	"PleaseEnterValidPrivateKey": "Please enter a valid private key",
+	"ExportData": "Export data",
+	"Export": "Export"
 }

@@ -1,12 +1,12 @@
 import { ScreensContext } from "@/contexts/screens";
 import type { TGroupId, TTagId } from "@/evolu-db";
 import {
+	type TCALCULATIONS_OUTPUT_V2,
+	type TPopulatedEntry,
 	entriesQuery,
 	getCalculations_v2,
 	populateEntries,
 	recurringConfigsQuery,
-	type TCALCULATIONS_OUTPUT_V2,
-	type TPopulatedEntry,
 } from "@/evolu-queries";
 import { useFilters } from "@/hooks/use-filters";
 import { useLocalization } from "@/hooks/use-localization";
@@ -16,7 +16,7 @@ import { useQuery } from "@evolu/react";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import dayjs from "dayjs";
 import type React from "react";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 
 export interface ScreensContextType {
 	activeScreen: TScreenId;

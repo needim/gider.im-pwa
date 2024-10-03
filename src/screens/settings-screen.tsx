@@ -10,6 +10,7 @@ import { TagDrawer, type TagDrawerRef } from "@/components/custom/tag-drawer";
 import { ThemeToggle } from "@/components/custom/theme-toggle";
 import { EraseDataDrawer, type EraseDataDrawerRef } from "@/components/custom/v2/erase-data-drawer";
 import { PrivateKeyDrawer, type PrivateKeyDrawerRef } from "@/components/custom/v2/private-key-drawer";
+import { RestoreKeyDrawer, type RestoreKeyDrawerRef } from "@/components/custom/v2/restore-key-drawer";
 import { Button } from "@/components/ui/button";
 import { useLocalization } from "@/hooks/use-localization";
 import { cn, storageKeys } from "@/lib/utils";
@@ -17,11 +18,12 @@ import {
 	IconCashBanknoteFilled,
 	IconCategoryFilled,
 	IconChevronRight,
-	IconCircleKeyFilled,
+	IconCloudDownload,
 	IconContrastFilled,
-	IconCurrencyCent,
+	IconDecimal,
 	IconEyeFilled,
 	IconHeartFilled,
+	IconKeyFilled,
 	IconLanguageHiragana,
 	IconNumber123,
 	IconTagsFilled,
@@ -55,6 +57,7 @@ export function SettingsScreen() {
 	const tagDrawerRef = useRef<TagDrawerRef>(null);
 	const eraseDataDrawerRef = useRef<EraseDataDrawerRef>(null);
 	const privateKeyDrawerRef = useRef<PrivateKeyDrawerRef>(null);
+	const restoreKeyDrawerRef = useRef<RestoreKeyDrawerRef>(null);
 	const sponsorsEnabled = false;
 	return (
 		<>
@@ -81,7 +84,7 @@ export function SettingsScreen() {
 								<SettingsRow Icon={IconCashBanknoteFilled} iconBackground="bg-green-500" title={m.MainCurrency()}>
 									<MainCurrencySelector />
 								</SettingsRow>
-								<SettingsRow Icon={IconCurrencyCent} iconBackground="bg-teal-500" title={m.DecimalLength()}>
+								<SettingsRow Icon={IconDecimal} iconBackground="bg-teal-500" title={m.DecimalLength()}>
 									<DecimalSelector />
 								</SettingsRow>
 								<SettingsRow Icon={IconNumber123} iconBackground="bg-cyan-600" title={m.NumberFormat()}>
@@ -143,20 +146,8 @@ export function SettingsScreen() {
 									>
 										Import <IconChevronRight className="size-4 ml-1  relative -mr-1" />
 									</Button>
-								</SettingsRow>
-								<SettingsRow Icon={IconSquareArrowUpFilled} iconBackground="bg-pink-500" title="Export data">
-									<Button
-										size="sm"
-										variant="outline"
-										className="rounded"
-										onClick={() => {
-											// tagDrawerRef.current?.openDrawer();
-										}}
-									>
-										Export <IconChevronRight className="size-4 ml-1  relative -mr-1" />
-									</Button>
 								</SettingsRow> */}
-								<SettingsRow Icon={IconCircleKeyFilled} iconBackground="bg-pink-500" title={m.ViewPrivateKey()}>
+								<SettingsRow Icon={IconKeyFilled} iconBackground="bg-pink-500" title={m.ViewPrivateKey()}>
 									<Button
 										size="sm"
 										variant="outline"
@@ -168,6 +159,30 @@ export function SettingsScreen() {
 										{m.View()} <IconChevronRight className="size-4 ml-1  relative -mr-1" />
 									</Button>
 								</SettingsRow>
+								<SettingsRow Icon={IconCloudDownload} iconBackground="bg-teal-500" title={m.RestoreData()}>
+									<Button
+										size="sm"
+										variant="outline"
+										className="rounded"
+										onClick={() => {
+											restoreKeyDrawerRef.current?.openDrawer();
+										}}
+									>
+										{m.Restore()} <IconChevronRight className="size-4 ml-1  relative -mr-1" />
+									</Button>
+								</SettingsRow>
+								{/* <SettingsRow Icon={IconSquareArrowUpFilled} iconBackground="bg-cyan-500" title={m.ExportData()}>
+									<Button
+										size="sm"
+										variant="outline"
+										className="rounded"
+										onClick={() => {
+											// tagDrawerRef.current?.openDrawer();
+										}}
+									>
+										{m.Export()} <IconChevronRight className="size-4 ml-1  relative -mr-1" />
+									</Button>
+								</SettingsRow> */}
 								<SettingsRow Icon={IconTrashXFilled} iconBackground="bg-red-500" title={m.EraseData()}>
 									<Button
 										size="sm"
@@ -415,6 +430,7 @@ export function SettingsScreen() {
 			<TagDrawer ref={tagDrawerRef} />
 			<EraseDataDrawer ref={eraseDataDrawerRef} />
 			<PrivateKeyDrawer ref={privateKeyDrawerRef} />
+			<RestoreKeyDrawer ref={restoreKeyDrawerRef} />
 		</>
 	);
 }
