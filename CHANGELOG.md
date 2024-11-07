@@ -1,5 +1,11 @@
 # @needim/giderim-pwa
 
+## 0.7.1
+
+### Patch Changes
+
+- c26d15f: fix for calendar navigation
+
 ## 0.7.0
 
 ### Minor Changes
