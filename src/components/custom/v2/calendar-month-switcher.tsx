@@ -6,13 +6,21 @@ import { IconChevronLeft, IconChevronRight, IconRestore } from "@tabler/icons-re
 import dayjs from "dayjs";
 
 export function CalendarMonthSwitcher(): React.ReactElement {
-	const { activeScreen, calendarIndex, viewingIndex, setCalendarIndex, isViewingCurrentMonth } = useScreens();
+	const {
+		activeScreen,
+		calendarIndex,
+		viewingIndex,
+		viewportEndDate,
+		viewportStartDate,
+		setCalendarIndex,
+		isViewingCurrentMonth,
+	} = useScreens();
 	const { m } = useLocalization();
 
 	const currentMonth = dayjs().format("YYYY-MM");
 
 	const isPrevDisabled = viewingIndex === 0;
-	const isNextDisabled = viewingIndex === 13;
+	const isNextDisabled = viewingIndex === viewportEndDate.diff(viewportStartDate, "month");
 
 	if (activeScreen !== "calendar") {
 		return <></>;
