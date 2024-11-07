@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 import { useRef } from "react";
 
 export function BottomNavV2() {
-	const { activeScreen, setScreen, calendarIndex, calendarType } = useScreens();
+	const { activeScreen, setScreen, setCalendarIndex, calendarIndex, calendarType } = useScreens();
 
 	const nav = [
 		{
@@ -171,6 +171,9 @@ export function BottomNavV2() {
 								)}
 								onClick={() => {
 									if (item.presentation === "screen") {
+										if (item.key === "calendar") {
+											setCalendarIndex(dayjs().format("YYYY-MM"));
+										}
 										setScreen(item.key);
 									} else {
 										addTransactionRef.current?.openDrawer(

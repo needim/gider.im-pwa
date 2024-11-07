@@ -7,10 +7,11 @@ import { AutoTextSize } from "auto-text-size";
 import { AmountDisplay } from "@/components/custom/amount-display";
 import { CurrencySelector } from "@/components/custom/v2/add-entry/currency-selector";
 import { DatePicker } from "@/components/custom/v2/add-entry/date-picker";
+import { EntryTypeSelect } from "@/components/custom/v2/add-entry/entry-type-select";
 import { GroupSelect } from "@/components/custom/v2/add-entry/group-select";
 import { RecurrencePresetSelect } from "@/components/custom/v2/add-entry/recurrence-preset-select";
 import { TagSelect } from "@/components/custom/v2/add-entry/tag-select";
-import { CalendarTabs } from "@/components/custom/v2/calendar-tabs";
+import { HorizontalScrollView } from "@/components/custom/v2/horizontal-scroll-view";
 import { Input } from "@/components/ui/input";
 import {
 	type TEvoluDB,
@@ -35,13 +36,7 @@ import {
 } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
-import {
-	forwardRef,
-	useEffect,
-	useImperativeHandle,
-	useRef,
-	useState,
-} from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
@@ -53,8 +48,7 @@ export interface EntryDrawerRef {
 
 export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 	const [open, setOpen] = useState(false);
-	const { lang, mainCurrency, decimalMode, decimal, getCurrency, m } =
-		useLocalization();
+	const { lang, mainCurrency, decimalMode, decimal, getCurrency, m } = useLocalization();
 
 	const groups = useQuery(groupsQuery);
 	const tags = useQuery(tagsQuery);
@@ -104,12 +98,7 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 			// TODO: add assets support
 			const now = dayjs();
 			// We are setting these for ordering purposes
-			values.startDate.setHours(
-				now.hour(),
-				now.minute(),
-				now.second(),
-				now.millisecond(),
-			);
+			values.startDate.setHours(now.hour(), now.minute(), now.second(), now.millisecond());
 			const recurringId =
 				values.mode === "one-time"
 					? null
@@ -120,9 +109,7 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 							every: values.every || 1,
 							endDate:
 								values.mode === "finite"
-									? dayjs(values.startDate)
-											.add(Number(values.every), values.recurrence)
-											.toDate()
+									? dayjs(values.startDate).add(Number(values.every), values.recurrence).toDate()
 									: null,
 						}).id;
 
@@ -130,8 +117,7 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 				type: values.type,
 				name: decodeName(values.name),
 				amount: decodeAmount(Number(values.amount).toFixed(8).toString()),
-				currencyCode:
-					decodeCurrency(values.currency) || decodeCurrency(mainCurrency),
+				currencyCode: decodeCurrency(values.currency) || decodeCurrency(mainCurrency),
 				date: decodeDate(values.startDate.toISOString()),
 				groupId: values.group ? decodeGroupId(values.group) : null,
 				tagId: values.tag ? decodeTagId(values.tag) : null,
@@ -146,9 +132,7 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 		return;
 	};
 
-	const backspaceIntervalId = useRef<ReturnType<typeof setInterval> | null>(
-		null,
-	);
+	const backspaceIntervalId = useRef<ReturnType<typeof setInterval> | null>(null);
 
 	const startBackspacing = () => {
 		if (backspaceIntervalId.current) return;
@@ -187,39 +171,22 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 			}}
 			className="absolute z-50 bg-popover inset-0 flex flex-col min-h-svh p-6 pt-2 px-5"
 		>
-			<div className="flex justify-between items-center mb-6">
-				<Button
-					variant="ghost"
-					size="icon"
-					className="rounded shrink-0"
-					onClick={() => setOpen(false)}
-				>
+			<div className="flex justify-between items-center absolute z-50">
+				<Button variant="ghost" size="icon" className="rounded shrink-0" onClick={() => setOpen(false)}>
 					<IconX className="h-6 w-6" />
 				</Button>
-				<CalendarTabs
-					className="mt-0 w-full ml-16"
-					size="small"
-					value={form.watch("type")}
-					onValueChange={(val) => form.setValue("type", val)}
-				/>
 			</div>
 
-			<div className="flex flex-col items-center mb-6 grow justify-center relative">
-				<div className="mb-4 flex items-center w-full indent-11 pr-11">
+			<div className="flex flex-col items-center mb-1.5 grow justify-center relative">
+				<div className="mb-1.5 flex items-center w-full indent-11 pr-11">
 					<div
 						className={cn(
-							"font-medium text-6xl w-full text-center block justify-center min-h-[86px] leading-[80px]",
+							"font-medium text-6xl w-full text-center block justify-center min-h-[76px] leading-[80px]",
 							form.watch("amount").length === 0 && "text-muted-foreground",
 							form.watch("amount").length > 8 && "text-right justify-end",
 						)}
 					>
-						<AutoTextSize
-							as={"div"}
-							mode="oneline"
-							minFontSizePx={24}
-							maxFontSizePx={60}
-							fontSizePrecisionPx={0.1}
-						>
+						<AutoTextSize as={"div"} mode="oneline" minFontSizePx={24} maxFontSizePx={60} fontSizePrecisionPx={0.1}>
 							<AmountDisplay
 								amount={form.watch("amount")}
 								currencyCode={form.watch("currency") || mainCurrency}
@@ -252,32 +219,7 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 						<IconBackspaceFilled />
 					</Button>
 				</div>
-				<div className="flex items-center gap-2 flex-wrap justify-center relative">
-					<Input
-						{...form.register("name")}
-						startIcon={
-							form.formState.errors.name
-								? IconExclamationCircleFilled
-								: IconSquareRoundedLetterA
-						}
-						startIconClassName={
-							form.formState.errors.name ? "text-rose-500" : ""
-						}
-						autoComplete="off"
-						placeholder={m.AddName()}
-						parentClassName="max-w-44"
-						className="rounded"
-					/>
-					<CurrencySelector
-						value={form.watch("currency")}
-						onValueChange={(val) => form.setValue("currency", val)}
-					>
-						<Button variant="outline" className="rounded" disableScale>
-							<IconCoins className="-left-1.5 size-5 relative text-muted-foreground" />
-							{getCurrency(form.watch("currency"))?.iso_code}
-						</Button>
-					</CurrencySelector>
-				</div>
+
 				<pre className="text-xs hidden">
 					{JSON.stringify(
 						{
@@ -290,8 +232,74 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 						2,
 					)}
 				</pre>
-				<div className={cn("flex justify-end mt-2 gap-2")}>
-					{groupsCount > 0 && (
+			</div>
+
+			<div className="flex items-center gap-2 justify-center relative">
+				<Input
+					{...form.register("name")}
+					startIcon={form.formState.errors.name ? IconExclamationCircleFilled : IconSquareRoundedLetterA}
+					startIconClassName={form.formState.errors.name ? "text-rose-500" : ""}
+					autoComplete="off"
+					placeholder={m.AddName()}
+					parentClassName=""
+					className="rounded"
+				/>
+				<CurrencySelector value={form.watch("currency")} onValueChange={(val) => form.setValue("currency", val)}>
+					<Button variant="outline" className="rounded" disableScale>
+						<IconCoins className="-left-1.5 size-5 relative text-muted-foreground" />
+						{getCurrency(form.watch("currency"))?.iso_code}
+					</Button>
+				</CurrencySelector>
+			</div>
+			<HorizontalScrollView>
+				<div className="shrink-0">
+					<EntryTypeSelect
+						value={form.watch("type")}
+						onValueChange={(val) => {
+							form.setValue("type", val);
+						}}
+					/>
+				</div>
+				<div className="shrink-0">
+					<RecurrencePresetSelect
+						startDate={form.watch("startDate")}
+						defaultValue={{
+							mode: form.watch("mode"),
+							recurrence: form.watch("recurrence"),
+							interval: form.watch("interval"),
+							every: form.watch("every"),
+						}}
+						onValueChange={(v) => {
+							if (v) {
+								form.setValue("mode", v.mode);
+								form.setValue("recurrence", v.recurrence);
+								form.setValue("interval", v.interval);
+								form.setValue("every", v.every);
+							} else {
+								form.setValue("mode", "one-time");
+								form.setValue("recurrence", undefined);
+								form.setValue("interval", undefined);
+								form.setValue("every", undefined);
+							}
+						}}
+					/>
+				</div>
+				<div className="shrink-0">
+					<DatePicker
+						value={form.watch("startDate")}
+						onValueChange={(val) => {
+							if (val) form.setValue("startDate", val!); // disable undefined
+						}}
+					>
+						<Button variant="outline" className="justify-start shrink rounded grow" disableScale>
+							<IconCalendarMonth className="-left-1.5 relative text-muted-foreground size-5" />
+							<span className="truncate">{dayjs(form.watch("startDate")).format("DD MMM, YY")}</span>
+						</Button>
+					</DatePicker>
+				</div>
+
+				{groupsCount > 0 && (
+					<div className="shrink-0">
 						<GroupSelect
 							value={form.watch("group")}
 							onValueChange={(val) => {
@@ -302,9 +310,10 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 								}
 							}}
 						/>
-					)}
-
-					{tagsCount > 0 && (
+					</div>
+				)}
+				{tagsCount > 0 && (
+					<div className="shrink-0">
 						<TagSelect
 							value={form.watch("tag")}
 							onValueChange={(val) => {
@@ -315,53 +324,9 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 								}
 							}}
 						/>
-					)}
-				</div>
-			</div>
-
-			<div className="grid grid-cols-2 gap-2 mb-2">
-				<DatePicker
-					value={form.watch("startDate")}
-					onValueChange={(val) => {
-						if (val) form.setValue("startDate", val!); // disable undefined
-					}}
-				>
-					<Button
-						variant="outline"
-						className="justify-start shrink rounded grow"
-						disableScale
-					>
-						<IconCalendarMonth className="-left-1.5 relative text-muted-foreground size-5" />
-						<span className="truncate">
-							{dayjs(form.watch("startDate")).format("DD MMM, YY")}
-						</span>
-					</Button>
-				</DatePicker>
-
-				<RecurrencePresetSelect
-					startDate={form.watch("startDate")}
-					defaultValue={{
-						mode: form.watch("mode"),
-						recurrence: form.watch("recurrence"),
-						interval: form.watch("interval"),
-						every: form.watch("every"),
-					}}
-					onValueChange={(v) => {
-						if (v) {
-							form.setValue("mode", v.mode);
-							form.setValue("recurrence", v.recurrence);
-							form.setValue("interval", v.interval);
-							form.setValue("every", v.every);
-						} else {
-							form.setValue("mode", "one-time");
-							form.setValue("recurrence", undefined);
-							form.setValue("interval", undefined);
-							form.setValue("every", undefined);
-						}
-					}}
-				/>
-			</div>
-
+					</div>
+				)}
+			</HorizontalScrollView>
 			<div className="grid grid-cols-3 gap-3 ">
 				{[1, 2, 3, 4, 5, 6, 7, 8, 9, decimalChar, 0].map((char) => (
 					<Button
@@ -369,22 +334,16 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 						variant="secondary"
 						className={cn(
 							"text-3xl py-9 font-semibold rounded grow w-full",
-							hideDecimalPoint &&
-								char === decimalChar &&
-								"hidden pointer-events-none",
+							hideDecimalPoint && char === decimalChar && "hidden pointer-events-none",
 							hideDecimalPoint && char === 0 && "col-span-2",
 						)}
 						disabled={char === decimalChar && hideDecimalPoint}
 						onClick={() => {
-							form.setValue(
-								"amount",
-								form.getValues("amount") + (char === decimalChar ? "." : char),
-								{
-									shouldValidate: true,
-									shouldDirty: true,
-									shouldTouch: true,
-								},
-							);
+							form.setValue("amount", form.getValues("amount") + (char === decimalChar ? "." : char), {
+								shouldValidate: true,
+								shouldDirty: true,
+								shouldTouch: true,
+							});
 						}}
 					>
 						{char}

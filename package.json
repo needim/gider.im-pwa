@@ -54,6 +54,7 @@
 		"react-error-boundary": "^4.0.13",
 		"react-hook-form": "^7.53.0",
 		"react-number-format": "^5.4.2",
+		"react-use-draggable-scroll": "^0.4.7",
 		"recharts": "^2.12.7",
 		"tailwind-merge": "^2.5.2",
 		"tailwindcss-animate": "^1.0.7",

@@ -93,6 +93,16 @@
     @apply outline-dashed outline-red-500/75;
   }
 
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
   .debug-all,
   .debug-all * {
     @apply outline-dashed outline-red-500/75;

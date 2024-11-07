@@ -47,12 +47,12 @@ export const ScreensProvider: React.FC<{ children: ReactNode }> = ({ children })
 		() => populateEntries(entries.rows, recurringConfigs.rows),
 		[entries.rows, recurringConfigs.rows],
 	);
-	// user can view 3 months into the past
-	const viewportStartDate = dayjs().startOf("month").subtract(3, "month");
+	// user can view 12 months into the past
+	const viewportStartDate = dayjs().startOf("month").subtract(12, "month");
 	// user can only view 12 months into the future
 	const viewportEndDate = dayjs().startOf("month").add(11, "month");
 
-	const [screen, setScreen] = useLocalStorage<TScreenId>(storageKeys.activeScreen, "calendar");
+	const [screen, setScreen] = useState<TScreenId>("calendar");
 
 	const [calendarType, setCalendarType] = useLocalStorage<TEntryType>(storageKeys.calendarType, "income");
 	const [calendarVision, setCalendarVision] = useLocalStorage<TCalendarVision>(storageKeys.calendarVision, "foresight");
