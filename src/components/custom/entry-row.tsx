@@ -25,7 +25,6 @@ export function EntryRow({
 
 	return (
 		<motion.div
-			data-entry-row="yes"
 			key={rowId}
 			className={cn(
 				"flex justify-between items-center group border-b border-zinc-100 dark:border-zinc-900",

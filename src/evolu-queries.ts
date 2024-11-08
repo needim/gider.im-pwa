@@ -1,10 +1,12 @@
 import {
+  type TAmountString,
   type TEntryId,
   type TExclusionId,
   type TGroupId,
   type TRecurringConfigId,
   type TTagId,
   decodeAmount,
+  decodeBoolean,
   decodeName,
   evolu,
 } from "@/evolu-db";
@@ -12,6 +14,7 @@ import { storageKeys } from "@/lib/utils";
 import {
   type ExtractRow,
   type NotNull,
+  type SqliteBoolean,
   cast,
   jsonArrayFrom,
   jsonObjectFrom,
@@ -85,6 +88,7 @@ export const recurringConfigsQuery = (rId: TRecurringConfigId | null = null) =>
                       "groupId",
                       "tagId",
                     ])
+                    .$narrowType<TNarrowed>()
                     .select((eb) => [
                       jsonObjectFrom(
                         eb
@@ -107,7 +111,6 @@ export const recurringConfigsQuery = (rId: TRecurringConfigId | null = null) =>
                           .whereRef("entryTag.id", "=", "modifiedEntry.tagId")
                       ).as("entryTag"),
                     ])
-                    .$narrowType<TNarrowed>()
                     .whereRef(
                       "modifiedEntry.id",
                       "=",
@@ -309,9 +312,12 @@ export const generateOccurrences = (
     diff = MAX_OCCURENCES[frequency];
   }
 
-  let installment = 0;
+  let occurenceForFuture: {
+    amount: string;
+    fullfilled: SqliteBoolean;
+  } | null = null;
+
   for (let i = 0; i < diff; i += every) {
-    installment++;
     const currDate = dayjs(startDate).add(i, frequency);
 
     const isExcluded = exclusions.some(
@@ -323,13 +329,23 @@ export const generateOccurrences = (
         currDate.isSame(dayjs(e.date), "day") && e.reason === "modification"
     );
 
+    if (isModified && !!isModified?.applyToSubsequents) {
+      occurenceForFuture = {
+        amount: isModified.modifiedEntry!.amount as TAmountString,
+        fullfilled: decodeBoolean(0),
+      };
+    }
+
     if (!isExcluded) {
       occurences.push({
-        index: installment,
+        index: i + 1,
         date: currDate.toDate(),
-        applyToSubsequents: isModified?.applyToSubsequents,
         exclusionId: isModified ? isModified.id : null,
-        modifiedEntry: isModified ? isModified.modifiedEntry : null,
+        modifiedEntry: isModified
+          ? isModified.modifiedEntry
+          : occurenceForFuture
+          ? { ...recurringConfig.entry, ...occurenceForFuture }
+          : null,
       });
     }
   }
@@ -360,7 +376,17 @@ export const populateEntries = (
     const exclusions = recurringEntry.exclusions || [];
     const occurrences = generateOccurrences(recurringEntry, exclusions);
     console.log("occurrences", occurrences);
+
     occurrences.forEach((occ) => {
+      const details = {
+        ...recurringEntry.entry,
+        ...occ.modifiedEntry,
+      } as NonNullable<TEntryRow>;
+
+      if (!occ.modifiedEntry) {
+        details.fullfilled = cast(false);
+      }
+
       entriesList.push({
         recurringConfigId: recurringEntry.recurringConfigId,
         id: (occ.modifiedEntry?.entryId as TEntryId) || null,
@@ -369,12 +395,7 @@ export const populateEntries = (
         interval: recurringEntry.interval!,
         config: recurringEntry,
         date: occ.date,
-        details:
-          occ.modifiedEntry ||
-          ({
-            ...recurringEntry.entry,
-            fullfilled: cast(false),
-          } as NonNullable<TEntryRow>),
+        details,
       });
     });
   });
@@ -440,26 +461,6 @@ type TCALCULATIONS_OUTPUT = Record<
     income: TPopulatedEntry[];
     expense: TPopulatedEntry[];
     assets: TPopulatedEntry[]; // not implemented yet
-    // groupedByCurrency: {
-    // 	income: Record<
-    // 		string,
-    // 		{
-    // 			entries: TPopulatedEntry[];
-    // 			expected: number;
-    // 			fullfilled: number;
-    // 			remaining: number;
-    // 		}
-    // 	>;
-    // 	expense: Record<
-    // 		string,
-    // 		{
-    // 			entries: TPopulatedEntry[];
-    // 			expected: number;
-    // 			fullfilled: number;
-    // 			remaining: number;
-    // 		}
-    // 	>;
-    // };
     // ---
     incomesGroupedByCurrency: Record<string, TPopulatedEntry[]>;
     totalExpectedIncomeGroupedByCurrency: Record<string, number>;

@@ -25,24 +25,6 @@ export interface EntryDetailDrawerRef {
 	closeDrawer: () => void;
 }
 
-const ROW_ANIMATION_VARIANTS = {
-	initial: () => ({
-		scale: 0.98,
-		top: 10,
-	}),
-	animate: () => ({
-		scale: 1,
-		top: 0,
-	}),
-	transition: (i: number) => ({
-		delay: i * 0.1,
-		duration: 0.1,
-		type: "spring",
-		stiffness: 360,
-		damping: 20,
-	}),
-};
-
 export const EntryDetailDrawer = forwardRef<EntryDetailDrawerRef, {}>((_, ref) => {
 	const [open, setOpen] = useState(false);
 	const [entry, setEntry] = useState<TPopulatedEntry>();
@@ -148,7 +130,7 @@ export const EntryDetailDrawer = forwardRef<EntryDetailDrawerRef, {}>((_, ref) =
 						{entry.details.type === "expense" ? m.PaidStatus() : m.IncomePaidStatus()}
 					</p>
 					<AmountDisplay
-						amount={total}
+						amount={!entry.recurringConfigId && entry.details.fullfilled ? entry.details.amount : total}
 						currencyCode={entry.details.currencyCode!}
 						type={"short"}
 						className="font-semibold"
@@ -156,12 +138,7 @@ export const EntryDetailDrawer = forwardRef<EntryDetailDrawerRef, {}>((_, ref) =
 					/>
 				</div>
 				{!entry.recurringConfigId && (
-					<motion.div
-						initial={ROW_ANIMATION_VARIANTS.initial()}
-						animate={ROW_ANIMATION_VARIANTS.animate()}
-						transition={ROW_ANIMATION_VARIANTS.transition(0)}
-						className={cn("mx-4 relative flex items-center justify-between font-medium")}
-					>
+					<div className={cn("mx-4 py-1.5 relative flex items-center justify-between font-medium")}>
 						<div>{dayjs(entry.date).format("YYYY, MMMM")}</div>
 						<div>
 							<AmountDisplay
@@ -172,7 +149,7 @@ export const EntryDetailDrawer = forwardRef<EntryDetailDrawerRef, {}>((_, ref) =
 								showAs={entry.details.type === "expense" ? "minus" : undefined}
 							/>
 						</div>
-					</motion.div>
+					</div>
 				)}
 				{entry.recurringConfigId && (
 					<VerticalScrollView className="max-h-52 overflow-x-hidden gap-0 scrollGradient">
@@ -181,14 +158,11 @@ export const EntryDetailDrawer = forwardRef<EntryDetailDrawerRef, {}>((_, ref) =
 								return null;
 							}
 							return (
-								<motion.div
+								<div
 									key={h.index}
-									initial={ROW_ANIMATION_VARIANTS.initial()}
-									animate={ROW_ANIMATION_VARIANTS.animate()}
-									transition={ROW_ANIMATION_VARIANTS.transition(i)}
 									className={cn(
 										"mx-4 text-sm relative flex items-center justify-between py-1.5",
-										h.index === entry.index && "font-medium  mx-0 px-4 bg-zinc-100 dark:bg-zinc-900",
+										h.index === entry.index && "font-medium  mx-0 px-4 py-3 bg-zinc-100 dark:bg-zinc-900",
 										h.index !== entry.index && "text-muted-foreground",
 									)}
 								>
@@ -225,7 +199,7 @@ export const EntryDetailDrawer = forwardRef<EntryDetailDrawerRef, {}>((_, ref) =
 											showAs={h.details.type === "expense" ? "minus" : undefined}
 										/>
 									</div>
-								</motion.div>
+								</div>
 							);
 						})}
 					</VerticalScrollView>

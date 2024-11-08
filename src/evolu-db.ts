@@ -109,6 +109,7 @@ const decode = S.decodeSync;
 const decodeName = S.decodeSync(NonEmptyString100);
 const decodeCurrency = S.decodeSync(CurrencyIsoString);
 const decodeAmount = S.decodeSync(AmountString);
+const decodeBoolean = S.decodeSync(SqliteBoolean);
 const decodeDate = S.decodeSync(SqliteDate);
 const decodeGroupId = S.decodeSync(GroupId);
 const decodeTagId = S.decodeSync(TagId);
@@ -130,6 +131,7 @@ export {
   S,
   decode,
   decodeAmount,
+  decodeBoolean,
   decodeCurrency,
   decodeDate,
   decodeGroupId,
