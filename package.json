@@ -60,7 +60,7 @@
 		"tailwindcss-animate": "^1.0.7",
 		"tailwindcss-displaymodes": "^1.0.8",
 		"unplugin-fonts": "^1.1.1",
-		"vaul": "^1.0.0",
+		"vaul": "^1.1.1",
 		"workbox-window": "^7.1.0",
 		"zod": "^3.23.8"
 	},

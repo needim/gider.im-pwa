@@ -93,6 +93,46 @@
     @apply outline-dashed outline-red-500/75;
   }
 
+  .scrollGradient {
+    background: linear-gradient(#ffffff 33%, rgba(255, 255, 255, 0)),
+      linear-gradient(rgba(255, 255, 255, 0), #ffffff 66%) 0 100%,
+      radial-gradient(
+        farthest-side at 50% 0,
+        rgba(222, 222, 222, 0.5),
+        rgba(0, 0, 0, 0)
+      ),
+      radial-gradient(
+          farthest-side at 50% 100%,
+          rgba(222, 222, 222, 0.5),
+          rgba(0, 0, 0, 0)
+        )
+        0 100%;
+    background-color: #ffffff;
+    background-repeat: no-repeat;
+    background-attachment: local, local, scroll, scroll;
+    background-size: 100% 63px, 100% 63px, 100% 21px, 100% 21px;
+  }
+
+  .dark .scrollGradient {
+    background: linear-gradient(#09090b 33%, rgba(9, 9, 11, 0)),
+      linear-gradient(rgba(9, 9, 11, 0), #09090b 66%) 0 100%,
+      radial-gradient(
+        farthest-side at 50% 0,
+        rgba(28, 28, 28, 0.5),
+        rgba(0, 0, 0, 0)
+      ),
+      radial-gradient(
+          farthest-side at 50% 100%,
+          rgba(28, 28, 28, 0.5),
+          rgba(0, 0, 0, 0)
+        )
+        0 100%;
+    background-color: #09090b;
+    background-repeat: no-repeat;
+    background-attachment: local, local, scroll, scroll;
+    background-size: 100% 63px, 100% 63px, 100% 21px, 100% 21px;
+  }
+
   /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;

@@ -1,5 +1,5 @@
-import { EntryEditDialog, type EntryEditDialogRef } from "@/components/custom/entry-edit-dialog";
 import { EntryRow } from "@/components/custom/entry-row";
+import { EntryDetailDrawer, type EntryDetailDrawerRef } from "@/components/custom/v2/entry-detail-drawer";
 import IconEntriesEmptyState from "@/components/custom/v2/icons/entries-empty-state";
 import { useLocalization } from "@/hooks/use-localization";
 import { useScreens } from "@/hooks/use-screens";
@@ -13,8 +13,7 @@ export function CalendarScreen(): React.ReactElement {
 
 	const { m } = useLocalization();
 
-	// const addTransactionRef = useRef<EntryDrawerRef>(null);
-	const editDialogRef = useRef<EntryEditDialogRef>(null);
+	const entryDetailDrawerRef = useRef<EntryDetailDrawerRef>(null);
 
 	const showEmptyState = CALCULATIONS[viewingIndex]?.[calendarType].length === 0;
 
@@ -45,28 +44,16 @@ export function CalendarScreen(): React.ReactElement {
 					</div>
 				)}
 				{CALCULATIONS[viewingIndex]?.[calendarType]?.map((t, i) => (
-					<EntryRow key={`${i}-${t.id}-${t.recurringConfigId}`} entry={t} editDialogRef={editDialogRef} />
+					<EntryRow
+						key={`${i}-${t.id}-${t.recurringConfigId}`}
+						entry={t}
+						detailDrawerRef={entryDetailDrawerRef}
+						// editDialogRef={editDialogRef}
+					/>
 				))}
 			</div>
 
-			{/* <Button
-				className={cn(
-					"absolute standalone:bottom-16 bottom-12 z-50 mb-7 rounded-lg left-1/2 transform -translate-x-1/2 shadow-md transition-all duration-200",
-				)}
-				size="icon"
-				onClick={() => {
-					addTransactionRef.current?.openDrawer(
-						dayjs().isSame(calendarIndex, "month")
-							? dayjs()
-							: dayjs(calendarIndex),
-						calendarType,
-					);
-				}}
-			>
-				<IconPlus />
-			</Button> */}
-
-			<EntryEditDialog ref={editDialogRef} />
+			<EntryDetailDrawer ref={entryDetailDrawerRef} />
 		</>
 	);
 }

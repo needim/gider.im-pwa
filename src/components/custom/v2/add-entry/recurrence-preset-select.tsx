@@ -1,18 +1,8 @@
 import { PeriodSelector } from "@/components/custom/settings";
 import { Incrementor } from "@/components/custom/v2/add-entry/incrementor";
 import { Button } from "@/components/ui/button";
-import {
-	Popover,
-	PopoverAnchor,
-	PopoverContent,
-} from "@/components/ui/popover";
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectSeparator,
-} from "@/components/ui/select";
+import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectSeparator } from "@/components/ui/select";
 import { useLocalization } from "@/hooks/use-localization";
 import { cn } from "@/lib/utils";
 import type { EntryCreateSchema } from "@/schemas/entry";
@@ -55,6 +45,23 @@ type Option = {
 	config: RecurrenceConfig;
 };
 
+export const predictPreset = (config: RecurrenceConfig): RecurrencePreset => {
+	if (config.mode === "one-time") return "one-time";
+	if (config.mode === "infinite") {
+		if (config.recurrence === "month") {
+			if (config.every === 1) return "every-month";
+			if (config.every === 3) return "every-3-month";
+			if (config.every === 6) return "every-6-month";
+		}
+		if (config.recurrence === "year") {
+			if (config.every === 1) return "every-year";
+			if (config.every === 2) return "every-2-year";
+			if (config.every === 4) return "every-4-year";
+		}
+	}
+	return "custom";
+};
+
 export function RecurrencePresetSelect({
 	onValueChange,
 	startDate,
@@ -66,32 +73,9 @@ export function RecurrencePresetSelect({
 }) {
 	const { m } = useLocalization();
 
-	const [recurrenceConfig, setRecurrenceConfig] =
-		useState<RecurrenceConfig>(defaultValue);
+	const [recurrenceConfig, setRecurrenceConfig] = useState<RecurrenceConfig>(defaultValue);
+	const [recurrencePreset, setRecurrencePreset] = useState<RecurrencePreset>(predictPreset(defaultValue));
 
-	const predictPreset = (config: RecurrenceConfig): RecurrencePreset => {
-		if (config.mode === "one-time") return "one-time";
-		if (config.mode === "infinite") {
-			if (config.recurrence === "month") {
-				if (config.every === 1) return "every-month";
-				if (config.every === 3) return "every-3-month";
-				if (config.every === 6) return "every-6-month";
-			}
-			if (config.recurrence === "year") {
-				if (config.every === 1) return "every-year";
-				if (config.every === 2) return "every-2-year";
-				if (config.every === 4) return "every-4-year";
-			}
-		}
-		return "custom";
-	};
-
-	const [recurrencePreset, setRecurrencePreset] = useState<RecurrencePreset>(
-		predictPreset(defaultValue),
-	);
-	// const previousPreset = usePrevious(recurrencePreset);
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		setRecurrencePreset(predictPreset(defaultValue));
 	}, [defaultValue]);
@@ -214,16 +198,11 @@ export function RecurrencePresetSelect({
 				<SelectTrigger asChild>
 					<Button
 						variant="default"
-						className={cn(
-							"justify-start grow rounded w-full",
-							recurrencePreset === "custom" && "rounded-r-none",
-						)}
+						className={cn("justify-start grow rounded w-full", recurrencePreset === "custom" && "rounded-r-none")}
 						disableScale
 						disabled={showCustomPopover}
 					>
-						{selectedOption?.icon && (
-							<selectedOption.icon className="-left-1.5 size-5 relative" />
-						)}
+						{selectedOption?.icon && <selectedOption.icon className="-left-1.5 size-5 relative" />}
 						<span className="truncate max-w-full">{selectedOption?.label}</span>
 					</Button>
 				</SelectTrigger>
@@ -236,9 +215,7 @@ export function RecurrencePresetSelect({
 									{option.label}
 								</div>
 							</SelectItem>
-							{(index === 0 || index === options.length - 2) && (
-								<SelectSeparator />
-							)}
+							{(index === 0 || index === options.length - 2) && <SelectSeparator />}
 						</SelectGroup>
 					))}
 				</SelectContent>
@@ -271,9 +248,7 @@ export function RecurrencePresetSelect({
 					>
 						<IconX className="size-4" />
 					</Button>
-					<h2 className="font-semibold leading-tight shrink mb-2">
-						{m.RepeatsEvery()}
-					</h2>
+					<h2 className="font-semibold leading-tight shrink mb-2">{m.RepeatsEvery()}</h2>
 					<div className="grid grid-cols-2 gap-2 items-center">
 						<Incrementor
 							defaultValue={recurrenceConfig?.every || 1}
@@ -305,9 +280,7 @@ export function RecurrencePresetSelect({
 					</div>
 
 					<div className="h-0 border-t mt-3 -mx-3" />
-					<h2 className="font-semibold leading-tight grow mt-3">
-						{m.TotalInstallments()}
-					</h2>
+					<h2 className="font-semibold leading-tight grow mt-3">{m.TotalInstallments()}</h2>
 					<div className="grid grid-cols-2 mt-2 items-center gap-2">
 						<Incrementor
 							defaultValue={recurrenceConfig?.interval || 12}
@@ -317,9 +290,7 @@ export function RecurrencePresetSelect({
 							onChange={(installments) => {
 								const newConfig = {
 									...recurrenceConfig,
-									mode: (installments === 0
-										? "infinite"
-										: "finite") as TEntrySchema["mode"],
+									mode: (installments === 0 ? "infinite" : "finite") as TEntrySchema["mode"],
 									interval: installments,
 								};
 
@@ -336,8 +307,7 @@ export function RecurrencePresetSelect({
 									<span className="font-semibold">
 										{dayjs(startDate)
 											.add(
-												(recurrenceConfig.interval || 0) *
-													(recurrenceConfig.every || 1),
+												(recurrenceConfig.interval || 0) * (recurrenceConfig.every || 1),
 												recurrenceConfig.recurrence,
 											)
 											.format("DD MMM, YYYY")}

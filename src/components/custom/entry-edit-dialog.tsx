@@ -1,55 +1,31 @@
 import { useLocalization } from "@/hooks/use-localization";
 
-import {
-	IconInfinity,
-	IconRotateClockwise2,
-	IconTrash,
-} from "@tabler/icons-react";
+import { IconInfinity, IconRotateClockwise2 } from "@tabler/icons-react";
 
 import { Input } from "@/components/custom/input";
 import { InputAmount } from "@/components/custom/input-amount";
 import { Tag } from "@/components/custom/tag";
 import type { TagColor } from "@/components/custom/tag-color-picker";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuGroup,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import {
-	type TPopulatedEntry,
-	deleteEntry,
-	editEntry,
-	groupsQuery,
-	tagsQuery,
-} from "@/evolu-queries";
+import { Drawer, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { type TPopulatedEntry, editEntry, groupsQuery, tagsQuery } from "@/evolu-queries";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@evolu/react";
 import dayjs from "dayjs";
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 
-export interface EntryEditDialogRef {
-	openDialog: (entry: TPopulatedEntry) => void;
-	closeDialog: () => void;
+export interface EntryEditDrawerRef {
+	openDrawer: (entry: TPopulatedEntry) => void;
+	closeDrawer: () => void;
 }
 
-export const EntryEditDialog = forwardRef<EntryEditDialogRef, {}>((_, ref) => {
+export const EntryEditDrawer = forwardRef<
+	EntryEditDrawerRef,
+	{
+		onSave: () => void;
+	}
+>(({ onSave }, ref) => {
 	const [entry, setEntry] = useState<TPopulatedEntry>();
 	const groups = useQuery(groupsQuery);
 	const tags = useQuery(tagsQuery);
@@ -58,12 +34,8 @@ export const EntryEditDialog = forwardRef<EntryEditDialogRef, {}>((_, ref) => {
 
 	const [oName, setOName] = useState<string>(entry?.details.name || "");
 	const [oAmount, setOAmount] = useState<string>(entry?.details.amount || "");
-	const [oGroup, setOGroup] = useState<string>(
-		entry?.details.entryGroup?.groupId || "",
-	);
-	const [oTag, setOTag] = useState<string>(
-		entry?.details.entryTag?.tagId || "",
-	);
+	const [oGroup, setOGroup] = useState<string>(entry?.details.entryGroup?.groupId || "");
+	const [oTag, setOTag] = useState<string>(entry?.details.entryTag?.tagId || "");
 	const [applyToSubsequents, setApplyToSubsequents] = useState(false);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
@@ -76,7 +48,7 @@ export const EntryEditDialog = forwardRef<EntryEditDialogRef, {}>((_, ref) => {
 	const [open, setOpen] = useState(false);
 
 	useImperativeHandle(ref, () => ({
-		openDialog: (entry) => {
+		openDrawer: (entry) => {
 			setEntry(entry);
 			setOName(entry.details.name);
 			setOAmount(entry.details.amount);
@@ -84,7 +56,7 @@ export const EntryEditDialog = forwardRef<EntryEditDialogRef, {}>((_, ref) => {
 			setOTag(entry.details.entryTag?.tagId || "");
 			setOpen(true);
 		},
-		closeDialog: () => {
+		closeDrawer: () => {
 			setOpen(false);
 		},
 	}));
@@ -92,22 +64,23 @@ export const EntryEditDialog = forwardRef<EntryEditDialogRef, {}>((_, ref) => {
 	if (!entry) return null;
 
 	return (
-		<Dialog
+		<Drawer
+			nested
 			open={open}
 			onOpenChange={(open) => {
 				setOpen(open);
 			}}
 		>
-			<DialogContent
-				className="sm:max-w-[425px]"
+			<DrawerContent
+				className="standalone:pb-6 max-w-md mx-auto"
 				onOpenAutoFocus={(e) => {
 					e.preventDefault();
 				}}
 			>
-				<DialogHeader className="flex-row items-center justify-between">
-					<DialogTitle>{dayjs(entry.date).format("YYYY, MMMM")}</DialogTitle>
+				<DrawerHeader className="flex items-center justify-between">
+					<DrawerTitle>{dayjs(entry.date).format("YYYY, MMMM")}</DrawerTitle>
 
-					<div className="text-xs flex items-center gap-2 text-muted-foreground relative -top-0.5">
+					<div className="text-sm flex items-center gap-2 text-muted-foreground relative -top-0.5">
 						{!!entry.recurringConfigId && (
 							<span className="flex items-center font-mono gap-0.5 text-muted-foreground">
 								<IconRotateClockwise2 className="size-3" />
@@ -123,15 +96,10 @@ export const EntryEditDialog = forwardRef<EntryEditDialogRef, {}>((_, ref) => {
 						)}
 						{entry.details.fullfilled ? m.PaidStatus() : m.AwaitingStatus()}
 					</div>
-				</DialogHeader>
-				<div className="">
+				</DrawerHeader>
+				<div className="px-4">
 					{groupsCount + tagsCount > 0 && (
-						<div
-							className={cn(
-								"grid grid-cols-2 gap-3 mb-3",
-								groupsCount === 0 || (tagsCount === 0 && "grid-cols-1"),
-							)}
-						>
+						<div className={cn("grid grid-cols-2 gap-3 mb-3", groupsCount === 0 || (tagsCount === 0 && "grid-cols-1"))}>
 							<div className={cn(groupsCount === 0 && "hidden")}>
 								<Select
 									onValueChange={(value) => {
@@ -174,11 +142,7 @@ export const EntryEditDialog = forwardRef<EntryEditDialogRef, {}>((_, ref) => {
 										<SelectItem value="no-tag">Tag</SelectItem>
 										{tags.rows.map((tag) => (
 											<SelectItem key={tag.id} value={tag.id}>
-												<Tag
-													className="ml-0"
-													name={tag.name}
-													color={tag.color as TagColor}
-												/>
+												<Tag className="ml-0" name={tag.name} color={tag.color as TagColor} />
 											</SelectItem>
 										))}
 									</SelectContent>
@@ -207,8 +171,8 @@ export const EntryEditDialog = forwardRef<EntryEditDialogRef, {}>((_, ref) => {
 						/>
 					</div>
 
-					<div className="flex items-center gap-4 mt-4">
-						<Button
+					<div className="flex items-center gap-4">
+						{/* <Button
 							size="sm"
 							variant="default"
 							onClick={async () => {
@@ -231,9 +195,7 @@ export const EntryEditDialog = forwardRef<EntryEditDialogRef, {}>((_, ref) => {
 							<div className="flex items-center space-x-2">
 								<Checkbox
 									checked={applyToSubsequents}
-									onCheckedChange={(checked) =>
-										setApplyToSubsequents(!!checked)
-									}
+									onCheckedChange={(checked) => setApplyToSubsequents(!!checked)}
 									id="update-subsequents"
 								/>
 								<label
@@ -243,9 +205,9 @@ export const EntryEditDialog = forwardRef<EntryEditDialogRef, {}>((_, ref) => {
 									{m.ApplyToSubsequents()}
 								</label>
 							</div>
-						)}
+						)} */}
 
-						<DropdownMenu>
+						{/* <DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button variant="outline" size="icon" className="ml-auto">
 									<IconTrash className="size-4" />
@@ -281,10 +243,65 @@ export const EntryEditDialog = forwardRef<EntryEditDialogRef, {}>((_, ref) => {
 									)}
 								</DropdownMenuGroup>
 							</DropdownMenuContent>
-						</DropdownMenu>
+						</DropdownMenu> */}
+
+						{!!entry.recurringConfigId && (
+							<div className="flex items-center space-x-2 py-2 mt-2">
+								{/* <Checkbox
+									checked={applyToSubsequents}
+									onCheckedChange={(checked) => setApplyToSubsequents(!!checked)}
+									id="update-subsequents"
+									className="rounded-sm"
+								/> */}
+								<input
+									id="update-subsequents"
+									type="checkbox"
+									checked={applyToSubsequents}
+									onChange={() => {
+										setApplyToSubsequents(!applyToSubsequents);
+									}}
+									className={cn(
+										"size-5 rounded-xs border-2 m-1 border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sky-600 dark:checked:bg-sky-600 dark:checked:border-sky-600 focus:ring-2 focus:ring-transparent dark:focus:ring-transparent",
+									)}
+								/>
+								<label htmlFor="update-subsequents" className="text-sm font-medium leading-none">
+									{m.ApplyToSubsequents()}
+								</label>
+							</div>
+						)}
 					</div>
 				</div>
-			</DialogContent>
-		</Dialog>
+				<DrawerFooter className="grid grid-cols-2">
+					<Button
+						variant="default"
+						size="lg"
+						onClick={async () => {
+							await editEntry(
+								entry,
+								oName,
+								oAmount,
+								oGroup ? oGroup : null,
+								oTag ? oTag : null,
+								() => {},
+								applyToSubsequents,
+							);
+							setOpen(false);
+							onSave();
+						}}
+					>
+						{m.Save()}
+					</Button>
+					<Button
+						variant="secondary"
+						size="lg"
+						onClick={() => {
+							setOpen(false);
+						}}
+					>
+						{m.Cancel()}
+					</Button>
+				</DrawerFooter>
+			</DrawerContent>
+		</Drawer>
 	);
 });
