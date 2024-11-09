@@ -1,9 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {
-	IconChevronLeft,
-	IconChevronRight,
-	IconInfinity,
-} from "@tabler/icons-react";
+import { IconChevronLeft, IconChevronRight, IconInfinity } from "@tabler/icons-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -24,12 +20,8 @@ export function Incrementor({
 }: IncrementorProps): React.ReactElement {
 	const [value, setValue] = useState(defaultValue);
 
-	const incrementIntervalId = useRef<ReturnType<typeof setInterval> | null>(
-		null,
-	);
-	const decrementIntervalId = useRef<ReturnType<typeof setInterval> | null>(
-		null,
-	);
+	const incrementIntervalId = useRef<ReturnType<typeof setInterval> | null>(null);
+	const decrementIntervalId = useRef<ReturnType<typeof setInterval> | null>(null);
 
 	const startIncrement = () => {
 		if (incrementIntervalId.current) return;
@@ -87,7 +79,7 @@ export function Incrementor({
 			<Button
 				size="iconMd"
 				variant="outline"
-				className="dark:bg-zinc-950 rounded"
+				className="bg-white dark:bg-zinc-950 rounded"
 				onClick={() => {
 					if (value > min) {
 						setValue(value - 1);
@@ -106,17 +98,13 @@ export function Incrementor({
 			</Button>
 			<span className="tabular-nums font-mono font-semibold inline-flex items-center px-1">
 				<span className="w-8">
-					{zeroInfinitive && value === 0 ? (
-						<IconInfinity className="size-4 mx-auto" />
-					) : (
-						value
-					)}
+					{zeroInfinitive && value === 0 ? <IconInfinity className="size-4 mx-auto" /> : value}
 				</span>
 			</span>
 			<Button
 				size="iconMd"
 				variant="outline"
-				className="dark:bg-zinc-950 rounded"
+				className="bg-white dark:bg-zinc-950 rounded"
 				onClick={() => {
 					if (value < max) {
 						setValue(value + 1);

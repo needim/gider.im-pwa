@@ -1,9 +1,3 @@
-import { Button } from "@/components/ui/button";
-import { useLocalization } from "@/hooks/use-localization";
-import { EntryCreateSchema } from "@/schemas/entry";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { AutoTextSize } from "auto-text-size";
-
 import { AmountDisplay } from "@/components/custom/amount-display";
 import { CurrencySelector } from "@/components/custom/v2/add-entry/currency-selector";
 import { DatePicker } from "@/components/custom/v2/add-entry/date-picker";
@@ -12,6 +6,8 @@ import { GroupSelect } from "@/components/custom/v2/add-entry/group-select";
 import { RecurrencePresetSelect } from "@/components/custom/v2/add-entry/recurrence-preset-select";
 import { TagSelect } from "@/components/custom/v2/add-entry/tag-select";
 import { HorizontalScrollView } from "@/components/custom/v2/horizontal-scroll-view";
+import { Button } from "@/components/ui/button";
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import {
 	type TEvoluDB,
@@ -23,19 +19,22 @@ import {
 	decodeTagId,
 } from "@/evolu-db";
 import { groupsQuery, tagsQuery } from "@/evolu-queries";
+import { useLocalization } from "@/hooks/use-localization";
 import { cn } from "@/lib/utils";
+import { EntryCreateSchema } from "@/schemas/entry";
 import type { TEntryType } from "@/types";
 import { cast, useEvolu, useQuery } from "@evolu/react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	IconBackspaceFilled,
 	IconCalendarMonth,
 	IconCoins,
 	IconExclamationCircleFilled,
 	IconSquareRoundedLetterA,
-	IconX,
 } from "@tabler/icons-react";
+import { AutoTextSize } from "auto-text-size";
 import dayjs from "dayjs";
-import { motion } from "framer-motion";
+
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -161,106 +160,100 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 	}, []);
 
 	return (
-		<motion.div
-			initial={{ opacity: 1, top: "100%" }}
-			animate={{ opacity: open ? 1 : 1, top: open ? 0 : "100%" }}
-			transition={{
-				type: "tween",
-				ease: "circInOut",
-				duration: 0.3,
+		<Drawer
+			open={open}
+			onOpenChange={(v) => {
+				setOpen(v);
 			}}
-			className="absolute z-50 bg-popover inset-0 flex flex-col min-h-svh p-6 pt-2 px-5"
 		>
-			<div className="flex justify-between items-center absolute z-50">
-				<Button variant="ghost" size="icon" className="rounded shrink-0" onClick={() => setOpen(false)}>
-					<IconX className="h-6 w-6" />
-				</Button>
-			</div>
-
-			<div className="flex flex-col items-center mb-1.5 grow justify-center relative">
-				<div className="mb-1.5 flex items-center w-full indent-11 pr-11">
-					<div
-						className={cn(
-							"font-medium text-6xl w-full text-center block justify-center min-h-[76px] leading-[80px]",
-							form.watch("amount").length === 0 && "text-muted-foreground",
-							form.watch("amount").length > 8 && "text-right justify-end",
-						)}
-					>
-						<AutoTextSize as={"div"} mode="oneline" minFontSizePx={24} maxFontSizePx={60} fontSizePrecisionPx={0.1}>
-							<AmountDisplay
-								amount={form.watch("amount")}
-								currencyCode={form.watch("currency") || mainCurrency}
-								type="short"
-								showAs={form.watch("type") === "expense" ? "minus" : undefined}
-								useVision={false}
-								className={form.formState.errors.amount ? "text-rose-500" : ""}
-							/>
-						</AutoTextSize>
+			<DrawerContent className="standalone:pb-6 h-[99%] max-w-md mx-auto pb-2">
+				<DrawerHeader className="sr-only">
+					<DrawerTitle>Add new entry</DrawerTitle>
+					<DrawerDescription>
+						Add a new entry to your account. You can specify the amount, name, currency, recurrence, and more.
+					</DrawerDescription>
+				</DrawerHeader>
+				<div className="flex flex-col items-center mb-1.5 grow justify-center relative">
+					<div className="mb-1.5 flex items-center w-full indent-11 pr-11">
+						<div
+							className={cn(
+								"font-medium text-6xl w-full text-center block justify-center min-h-[76px] leading-[80px]",
+								form.watch("amount").length === 0 && "text-muted-foreground",
+								form.watch("amount").length > 8 && "text-right justify-end",
+							)}
+						>
+							<AutoTextSize as={"div"} mode="oneline" minFontSizePx={24} maxFontSizePx={60} fontSizePrecisionPx={0.1}>
+								<AmountDisplay
+									amount={form.watch("amount")}
+									currencyCode={form.watch("currency") || mainCurrency}
+									type="short"
+									showAs={form.watch("type") === "expense" ? "minus" : undefined}
+									useVision={false}
+								/>
+							</AutoTextSize>
+						</div>
+						<Button
+							className="rounded absolute right-0"
+							variant="link"
+							size="icon"
+							onClick={() =>
+								form.setValue("amount", form.getValues("amount").slice(0, -1), {
+									shouldValidate: true,
+									shouldDirty: true,
+									shouldTouch: true,
+								})
+							}
+							disabled={form.getValues("amount").length === 0}
+							onMouseDown={startBackspacing}
+							onMouseUp={stopBackspacing}
+							onMouseLeave={stopBackspacing}
+							onTouchStart={startBackspacing}
+							onTouchEnd={stopBackspacing}
+							onTouchCancel={stopBackspacing}
+						>
+							<IconBackspaceFilled />
+						</Button>
 					</div>
-					<Button
-						className="rounded absolute right-0"
-						variant="link"
-						size="icon"
-						onClick={() =>
-							form.setValue("amount", form.getValues("amount").slice(0, -1), {
-								shouldValidate: true,
-								shouldDirty: true,
-								shouldTouch: true,
-							})
-						}
-						disabled={form.getValues("amount").length === 0}
-						onMouseDown={startBackspacing}
-						onMouseUp={stopBackspacing}
-						onMouseLeave={stopBackspacing}
-						onTouchStart={startBackspacing}
-						onTouchEnd={stopBackspacing}
-						onTouchCancel={stopBackspacing}
-					>
-						<IconBackspaceFilled />
-					</Button>
+
+					<pre className="text-xs hidden">
+						{JSON.stringify(
+							{
+								mode: form.watch("mode"),
+								recurrence: form.watch("recurrence"),
+								interval: form.watch("interval"),
+								every: form.watch("every"),
+							},
+							null,
+							2,
+						)}
+					</pre>
 				</div>
 
-				<pre className="text-xs hidden">
-					{JSON.stringify(
-						{
-							mode: form.watch("mode"),
-							recurrence: form.watch("recurrence"),
-							interval: form.watch("interval"),
-							every: form.watch("every"),
-						},
-						null,
-						2,
-					)}
-				</pre>
-			</div>
+				<div className="flex px-4 items-center gap-2 justify-center relative">
+					<Input
+						{...form.register("name")}
+						startIcon={form.formState.errors.name ? IconExclamationCircleFilled : IconSquareRoundedLetterA}
+						startIconClassName={form.formState.errors.name ? "text-rose-500" : ""}
+						autoComplete="off"
+						placeholder={m.AddName()}
+						parentClassName=""
+						className="rounded"
+					/>
+					<CurrencySelector value={form.watch("currency")} onValueChange={(val) => form.setValue("currency", val)}>
+						<Button variant="outline" className="rounded" disableScale>
+							<IconCoins className="-left-1.5 size-5 relative text-muted-foreground" />
+							{getCurrency(form.watch("currency"))?.iso_code}
+						</Button>
+					</CurrencySelector>
+				</div>
 
-			<div className="flex items-center gap-2 justify-center relative">
-				<Input
-					{...form.register("name")}
-					startIcon={form.formState.errors.name ? IconExclamationCircleFilled : IconSquareRoundedLetterA}
-					startIconClassName={form.formState.errors.name ? "text-rose-500" : ""}
-					autoComplete="off"
-					placeholder={m.AddName()}
-					parentClassName=""
-					className="rounded"
-				/>
-				<CurrencySelector value={form.watch("currency")} onValueChange={(val) => form.setValue("currency", val)}>
-					<Button variant="outline" className="rounded" disableScale>
-						<IconCoins className="-left-1.5 size-5 relative text-muted-foreground" />
-						{getCurrency(form.watch("currency"))?.iso_code}
-					</Button>
-				</CurrencySelector>
-			</div>
-			<HorizontalScrollView>
-				<div className="shrink-0">
+				<HorizontalScrollView>
 					<EntryTypeSelect
 						value={form.watch("type")}
 						onValueChange={(val) => {
 							form.setValue("type", val);
 						}}
 					/>
-				</div>
-				<div className="shrink-0">
 					<RecurrencePresetSelect
 						startDate={form.watch("startDate")}
 						defaultValue={{
@@ -283,8 +276,6 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 							}
 						}}
 					/>
-				</div>
-				<div className="shrink-0">
 					<DatePicker
 						value={form.watch("startDate")}
 						onValueChange={(val) => {
@@ -296,10 +287,8 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 							<span className="truncate">{dayjs(form.watch("startDate")).format("DD MMM, YY")}</span>
 						</Button>
 					</DatePicker>
-				</div>
 
-				{groupsCount > 0 && (
-					<div className="shrink-0">
+					{groupsCount > 0 && (
 						<GroupSelect
 							value={form.watch("group")}
 							onValueChange={(val) => {
@@ -310,10 +299,8 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 								}
 							}}
 						/>
-					</div>
-				)}
-				{tagsCount > 0 && (
-					<div className="shrink-0">
+					)}
+					{tagsCount > 0 && (
 						<TagSelect
 							value={form.watch("tag")}
 							onValueChange={(val) => {
@@ -324,39 +311,40 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 								}
 							}}
 						/>
-					</div>
-				)}
-			</HorizontalScrollView>
-			<div className="grid grid-cols-3 gap-3 ">
-				{[1, 2, 3, 4, 5, 6, 7, 8, 9, decimalChar, 0].map((char) => (
+					)}
+				</HorizontalScrollView>
+
+				<div className="grid grid-cols-3 gap-3 px-4">
+					{[1, 2, 3, 4, 5, 6, 7, 8, 9, decimalChar, 0].map((char) => (
+						<Button
+							key={char}
+							variant="secondary"
+							className={cn(
+								"text-3xl py-9 font-semibold rounded grow w-full",
+								hideDecimalPoint && char === decimalChar && "hidden pointer-events-none",
+								hideDecimalPoint && char === 0 && "col-span-2",
+							)}
+							disabled={char === decimalChar && hideDecimalPoint}
+							onClick={() => {
+								form.setValue("amount", form.getValues("amount") + (char === decimalChar ? "." : char), {
+									shouldValidate: true,
+									shouldDirty: true,
+									shouldTouch: true,
+								});
+							}}
+						>
+							{char}
+						</Button>
+					))}
 					<Button
-						key={char}
-						variant="secondary"
-						className={cn(
-							"text-3xl py-9 font-semibold rounded grow w-full",
-							hideDecimalPoint && char === decimalChar && "hidden pointer-events-none",
-							hideDecimalPoint && char === 0 && "col-span-2",
-						)}
-						disabled={char === decimalChar && hideDecimalPoint}
-						onClick={() => {
-							form.setValue("amount", form.getValues("amount") + (char === decimalChar ? "." : char), {
-								shouldValidate: true,
-								shouldDirty: true,
-								shouldTouch: true,
-							});
-						}}
+						variant="default"
+						className="text-3xl py-9 font-semibold rounded"
+						onClick={form.handleSubmit(createEntry)}
 					>
-						{char}
+						✓
 					</Button>
-				))}
-				<Button
-					variant="default"
-					className="text-3xl py-9 font-semibold rounded"
-					onClick={form.handleSubmit(createEntry)}
-				>
-					✓
-				</Button>
-			</div>
-		</motion.div>
+				</div>
+			</DrawerContent>
+		</Drawer>
 	);
 });

@@ -10,28 +10,16 @@ export function HorizontalScrollView({
 	className?: string;
 	children: React.ReactNode;
 }) {
-	const ref2 = useRef<HTMLDivElement>() as React.MutableRefObject<HTMLInputElement>;
-	const { events: events2 } = useDraggable(ref2, {
+	const ref = useRef<HTMLDivElement>() as React.MutableRefObject<HTMLInputElement>;
+	const { events } = useDraggable(ref, {
 		applyRubberBandEffect: true,
 	});
 
 	return (
 		<div
-			ref={ref2}
-			{...events2}
-			onTouchStart={(e) => {
-				if (e.cancelable) {
-					e.preventDefault();
-				}
-				e.stopPropagation();
-			}}
-			onTouchMove={(e) => {
-				if (e.cancelable) {
-					e.preventDefault();
-				}
-				e.stopPropagation();
-			}}
-			className={cn("shrink-0 flex gap-2 px-5 py-2 items-center -mx-5 overflow-x-scroll z-40 no-scrollbar", className)}
+			ref={ref}
+			{...events}
+			className={cn("shrink-0 flex gap-2 px-4 py-2 items-center overflow-x-scroll z-40 no-scrollbar", className)}
 		>
 			{children}
 		</div>

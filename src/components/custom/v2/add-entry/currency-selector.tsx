@@ -1,11 +1,16 @@
+import { VerticalScrollView } from "@/components/custom/v2/vertical-scroll-view";
+import { Button } from "@/components/ui/button";
 import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-} from "@/components/ui/select";
+	Drawer,
+	DrawerClose,
+	DrawerContent,
+	DrawerDescription,
+	DrawerHeader,
+	DrawerTitle,
+	DrawerTrigger,
+} from "@/components/ui/drawer";
 import { currencies } from "@/lib/currencies";
-import { SelectTrigger } from "@radix-ui/react-select";
+import { IconCheck } from "@tabler/icons-react";
 import type React from "react";
 
 export function CurrencySelector({
@@ -18,21 +23,33 @@ export function CurrencySelector({
 	onValueChange: (value: string) => void;
 }): React.ReactElement {
 	return (
-		<Select value={value} onValueChange={(value) => onValueChange(value)}>
-			<SelectTrigger asChild>{children}</SelectTrigger>
-			<SelectContent>
-				<SelectGroup>
+		<Drawer nested>
+			<DrawerTrigger asChild>{children}</DrawerTrigger>
+			<DrawerContent className="pb-0 max-w-md px-4 mx-auto max-h-96">
+				<DrawerHeader className="sr-only">
+					<DrawerTitle>Select a currency</DrawerTitle>
+					<DrawerDescription>Select a currency</DrawerDescription>
+				</DrawerHeader>
+				<VerticalScrollView className="max-h-72 overflow-x-hidden gap-2 scrollGradient mt-4">
 					{currencies.map((currency) => (
-						<SelectItem key={currency.iso_code} value={currency.iso_code}>
-							{currency.name}
-							<span className="text-muted-foreground">
-								{" "}
-								- {currency.symbol}
-							</span>
-						</SelectItem>
+						<DrawerClose asChild key={currency.iso_code}>
+							<Button
+								onClick={() => onValueChange(currency.iso_code)}
+								variant={value === currency.iso_code ? "default" : "secondary"}
+								className="shrink-0 w-full justify-start"
+								size="lg"
+								key={currency.iso_code}
+							>
+								<span>
+									{currency.name}
+									<span className="text-muted-foreground"> - {currency.symbol}</span>
+								</span>
+								{value === currency.iso_code && <IconCheck className="ml-auto size-5" />}
+							</Button>
+						</DrawerClose>
 					))}
-				</SelectGroup>
-			</SelectContent>
-		</Select>
+				</VerticalScrollView>
+			</DrawerContent>
+		</Drawer>
 	);
 }
