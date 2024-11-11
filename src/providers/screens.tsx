@@ -1,15 +1,10 @@
 import { ScreensContext } from "@/contexts/screens";
 import type { TGroupId, TTagId } from "@/evolu-db";
-import {
-	type TCALCULATIONS_OUTPUT,
-	type TPopulatedEntry,
-	entriesQuery,
-	getCalculations,
-	populateEntries,
-	recurringConfigsQuery,
-} from "@/evolu-queries";
+import { entriesQuery, recurringConfigsQuery } from "@/evolu-queries";
 import { useFilters } from "@/hooks/use-filters";
 import { useLocalization } from "@/hooks/use-localization";
+import { getCalculations, type TCALCULATIONS_OUTPUT } from "@/lib/calculations";
+import { type TPopulatedEntry, populateEntries } from "@/lib/populateEntries";
 import { requestRates, storageKeys } from "@/lib/utils";
 import type { TCalendarVision, TEntryType, TScreenId } from "@/types";
 import { useQuery } from "@evolu/react";

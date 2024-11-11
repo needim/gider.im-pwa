@@ -1,3 +1,6 @@
+import { evolu } from "@/evolu-db";
+import { recurringConfigsQuery } from "@/evolu-queries";
+import { type TPopulatedEntry, populateEntries } from "@/lib/populateEntries";
 import type { TDecimalMode } from "@/providers/localization";
 import type { Theme } from "@/providers/theme";
 import type { Mnemonic } from "@evolu/react";
@@ -446,3 +449,36 @@ export const getNumberSymbols = (locale?: string) => {
 };
 
 export const BROWSER_LOCALE = new Intl.NumberFormat().resolvedOptions().locale;
+
+export const groupByCurrency = (entries: TPopulatedEntry[]) => {
+	return entries.reduce(
+		(acc, entry) => {
+			const currency = entry.details.currencyCode;
+			if (!acc[currency]) {
+				acc[currency] = [];
+			}
+			acc[currency].push(entry);
+			return acc;
+		},
+		{} as Record<string, TPopulatedEntry[]>,
+	);
+};
+
+export function getEntries<T extends object>(obj: T) {
+	const mainCurrency = localStorage.getItem(storageKeys.mainCurrency) || "TRY";
+	return Object.entries(obj).length ? Object.entries(obj) : [[mainCurrency, "0.00000000"]];
+}
+
+export async function getEntryHistory(entry: TPopulatedEntry) {
+	if (!entry.recurringConfigId) return [];
+
+	const recurringConfig = await evolu.loadQuery(recurringConfigsQuery(entry.recurringConfigId));
+
+	const populatedEntries = populateEntries([], recurringConfig.rows);
+
+	return populatedEntries;
+}
+
+export function sum(a: number, b: number) {
+	return a + b;
+}

@@ -1,4 +1,4 @@
-import { sum } from "@/evolu-queries";
+import { sum } from "@/lib/utils";
 import { expect, test } from "vitest";
 
 test("adds 1 + 2 to equal 3", () => {

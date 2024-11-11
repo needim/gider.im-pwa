@@ -1,14 +1,12 @@
 import { Tag } from "@/components/custom/tag";
-import {
-	type TagColor,
-	TagColorPicker,
-} from "@/components/custom/tag-color-picker";
+import { type TagColor, TagColorPicker } from "@/components/custom/tag-color-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { type TEvoluDB, decodeName } from "@/evolu-db";
-import { deleteTag, tagsQuery } from "@/evolu-queries";
+import { tagsQuery } from "@/evolu-queries";
 import { useLocalization } from "@/hooks/use-localization";
+import { deleteTag } from "@/lib/delete";
 import { useEvolu, useQuery } from "@evolu/react";
 import { IconPlus, IconTags, IconTrash } from "@tabler/icons-react";
 import React, { forwardRef, useImperativeHandle } from "react";
@@ -46,8 +44,7 @@ export const TagDrawer = forwardRef<TagDrawerRef, TagDrawerProps>((_, ref) => {
 	];
 
 	const availableSuggestedTags = suggestedTags.filter(
-		(suggestedTag) =>
-			!tags.rows.some((tag) => tag.suggestId === suggestedTag.suggestId),
+		(suggestedTag) => !tags.rows.some((tag) => tag.suggestId === suggestedTag.suggestId),
 	);
 
 	return (
@@ -58,11 +55,7 @@ export const TagDrawer = forwardRef<TagDrawerRef, TagDrawerProps>((_, ref) => {
 					setOpen(isOpen);
 				}}
 			>
-				<SheetContent
-					side="right"
-					className="overflow-y-auto"
-					onOpenAutoFocus={(e) => e.preventDefault()}
-				>
+				<SheetContent side="right" className="overflow-y-auto" onOpenAutoFocus={(e) => e.preventDefault()}>
 					<div className="px-1">
 						<div className="text-lg text-left flex justify-between items-center capitalize font-medium leading-none tracking-tight h-11">
 							{m.Tags()}

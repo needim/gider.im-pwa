@@ -14,9 +14,9 @@ import {
 	DrawerTitle,
 } from "@/components/ui/drawer";
 
-import { type TPopulatedEntry, getEntryHistory } from "@/evolu-queries";
 import { useLocalization } from "@/hooks/use-localization";
-import { cn } from "@/lib/utils";
+import type { TPopulatedEntry } from "@/lib/populateEntries";
+import { cn, getEntryHistory } from "@/lib/utils";
 import { IconInfinity, IconPointFilled, IconRotateClockwise2 } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
