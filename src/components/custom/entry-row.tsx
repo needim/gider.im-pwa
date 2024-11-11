@@ -87,10 +87,10 @@ export function EntryRow({
 								<IconRotateClockwise2 className="size-3" />
 								<span>
 									{entry.index}/
-									{entry.interval === 0 ? (
+									{entry.recurringConfig?.interval === 0 ? (
 										<IconInfinity className="inline" size={14} />
 									) : (
-										Math.round(entry.interval / (entry.config?.every ?? 1))
+										Math.round(entry.recurringConfig?.interval! / (entry.recurringConfig?.every ?? 1))
 									)}
 								</span>
 							</span>

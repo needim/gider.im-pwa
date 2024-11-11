@@ -1,11 +1,18 @@
 import { useLocalization } from "@/hooks/use-localization";
 
-import { IconInfinity, IconRotateClockwise2 } from "@tabler/icons-react";
+import {
+	IconCalendarMonth,
+	IconExclamationCircleFilled,
+	IconInfinity,
+	IconRotateClockwise2,
+} from "@tabler/icons-react";
 
 import { Input } from "@/components/custom/input";
 import { InputAmount } from "@/components/custom/input-amount";
 import { Tag } from "@/components/custom/tag";
 import type { TagColor } from "@/components/custom/tag-color-picker";
+import { DatePicker } from "@/components/custom/v2/add-entry/date-picker";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,6 +20,7 @@ import { type TPopulatedEntry, editEntry, groupsQuery, tagsQuery } from "@/evolu
 import { cn } from "@/lib/utils";
 import { useQuery } from "@evolu/react";
 import dayjs from "dayjs";
+import { motion } from "framer-motion";
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 
 export interface EntryEditDrawerRef {
@@ -33,6 +41,7 @@ export const EntryEditDrawer = forwardRef<
 	const groupsCount = groups.rows.length;
 
 	const [oName, setOName] = useState<string>(entry?.details.name || "");
+	const [oDate, setODate] = useState<Date>(dayjs(entry?.date).toDate() || "");
 	const [oAmount, setOAmount] = useState<string>(entry?.details.amount || "");
 	const [oGroup, setOGroup] = useState<string>(entry?.details.entryGroup?.groupId || "");
 	const [oTag, setOTag] = useState<string>(entry?.details.entryTag?.tagId || "");
@@ -51,6 +60,7 @@ export const EntryEditDrawer = forwardRef<
 		openDrawer: (entry) => {
 			setEntry(entry);
 			setOName(entry.details.name);
+			setODate(dayjs(entry.date).toDate());
 			setOAmount(entry.details.amount);
 			setOGroup(entry.details.entryGroup?.groupId || "");
 			setOTag(entry.details.entryTag?.tagId || "");
@@ -77,8 +87,12 @@ export const EntryEditDrawer = forwardRef<
 					e.preventDefault();
 				}}
 			>
-				<DrawerHeader className="flex items-center justify-between">
-					<DrawerTitle>{dayjs(entry.date).format("YYYY, MMMM")}</DrawerTitle>
+				<DrawerHeader className="flex items-start justify-between">
+					<DrawerTitle>
+						<div className="flex flex-col items-start gap-2">
+							<span className="text-2xl">{entry.details.name}</span>
+						</div>
+					</DrawerTitle>
 
 					<div className="text-sm flex items-center gap-2 text-muted-foreground relative -top-0.5">
 						{!!entry.recurringConfigId && (
@@ -86,10 +100,10 @@ export const EntryEditDrawer = forwardRef<
 								<IconRotateClockwise2 className="size-3" />
 								<span>
 									{entry.index}/
-									{entry.interval === 0 ? (
+									{entry.recurringConfig?.interval === 0 ? (
 										<IconInfinity className="inline" size={14} />
 									) : (
-										Math.round(entry.interval / (entry.config?.every ?? 1))
+										Math.round(entry.recurringConfig?.interval! / (entry.recurringConfig?.every ?? 1))
 									)}
 								</span>
 							</span>
@@ -150,6 +164,21 @@ export const EntryEditDrawer = forwardRef<
 							</div>
 						</div>
 					)}
+
+					<div>
+						<DatePicker
+							value={new Date(oDate)}
+							onValueChange={(newDate) => {
+								if (newDate) setODate(newDate);
+							}}
+							mode="day-change"
+						>
+							<Button variant="outline" className="w-full mb-3 justify-start shrink rounded grow" disableScale>
+								<IconCalendarMonth className="-left-1.5 relative text-muted-foreground size-5" />
+								<span className="truncate">{dayjs(oDate).format("DD MMM, YY")}</span>
+							</Button>
+						</DatePicker>
+					</div>
 
 					<div className="flex items-center gap-4">
 						<Input
@@ -246,13 +275,7 @@ export const EntryEditDrawer = forwardRef<
 						</DropdownMenu> */}
 
 						{!!entry.recurringConfigId && (
-							<div className="flex items-center space-x-2 py-2 mt-2">
-								{/* <Checkbox
-									checked={applyToSubsequents}
-									onCheckedChange={(checked) => setApplyToSubsequents(!!checked)}
-									id="update-subsequents"
-									className="rounded-sm"
-								/> */}
+							<div className="flex items-center space-x-2 mt-2">
 								<input
 									id="update-subsequents"
 									type="checkbox"
@@ -270,6 +293,17 @@ export const EntryEditDrawer = forwardRef<
 							</div>
 						)}
 					</div>
+					<motion.div
+						initial={{ height: 0 }}
+						animate={applyToSubsequents ? { height: "auto" } : { height: 0 }}
+						className="overflow-hidden mt-2"
+					>
+						<Alert variant="warning">
+							<IconExclamationCircleFilled className="size-6 dark:text-yellow-950" />
+							<AlertTitle>{m.Warning()}</AlertTitle>
+							<AlertDescription>{m.FutureEntriesWillBeOverwritten()}</AlertDescription>
+						</Alert>
+					</motion.div>
 				</div>
 				<DrawerFooter className="grid grid-cols-2">
 					<Button
@@ -282,6 +316,7 @@ export const EntryEditDrawer = forwardRef<
 								oAmount,
 								oGroup ? oGroup : null,
 								oTag ? oTag : null,
+								oDate ? oDate : null,
 								() => {},
 								applyToSubsequents,
 							);

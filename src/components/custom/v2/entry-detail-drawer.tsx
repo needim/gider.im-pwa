@@ -1,5 +1,7 @@
 import { AmountDisplay } from "@/components/custom/amount-display";
 import { EntryEditDrawer, type EntryEditDrawerRef } from "@/components/custom/entry-edit-dialog";
+import { Tag } from "@/components/custom/tag";
+import type { TagColor } from "@/components/custom/tag-color-picker";
 import { predictPreset } from "@/components/custom/v2/add-entry/recurrence-preset-select";
 import { VerticalScrollView } from "@/components/custom/v2/vertical-scroll-view";
 import { Button } from "@/components/ui/button";
@@ -46,7 +48,6 @@ export const EntryDetailDrawer = forwardRef<EntryDetailDrawerRef, {}>((_, ref) =
 	useEffect(() => {
 		if (open && entry) {
 			getEntryHistory(entry).then((history) => {
-				console.log("hisstory", history);
 				setHistory(history);
 			});
 		}
@@ -60,10 +61,10 @@ export const EntryDetailDrawer = forwardRef<EntryDetailDrawerRef, {}>((_, ref) =
 	if (!entry) return null;
 
 	const preset = predictPreset({
-		every: entry.config?.every ?? 1,
-		interval: entry.config?.interval ?? 0,
-		mode: !entry.recurringConfigId ? "one-time" : entry.config?.interval === 0 ? "infinite" : "finite",
-		recurrence: entry?.config?.frequency,
+		every: entry.recurringConfig?.every ?? 1,
+		interval: entry.recurringConfig?.interval ?? 0,
+		mode: !entry.recurringConfigId ? "one-time" : entry.recurringConfig?.interval === 0 ? "infinite" : "finite",
+		recurrence: entry?.recurringConfig?.frequency,
 	});
 
 	return (
@@ -76,7 +77,12 @@ export const EntryDetailDrawer = forwardRef<EntryDetailDrawerRef, {}>((_, ref) =
 		>
 			<DrawerContent className="standalone:pb-6 max-w-md mx-auto">
 				<DrawerHeader>
-					{/* <IconCircleKeyFilled className="w-12 h-12 mx-auto mb-2" /> */}
+					<div className="flex items-center justify-between font-medium shrink-0 text-base w-full gap-3">
+						{entry.details.entryGroup && <span className="text-muted-foreground">{entry.details.entryGroup.name}</span>}
+						{entry.details.entryTag?.name && (
+							<Tag name={entry.details.entryTag.name} color={entry.details.entryTag.color as TagColor} />
+						)}
+					</div>
 					<DrawerTitle className="text-2xl text-left flex items-center justify-between">
 						<div>{entry.details.name}</div>
 						<div className="text-lg flex items-center shrink-0 gap-2 text-muted-foreground relative">
@@ -85,10 +91,10 @@ export const EntryDetailDrawer = forwardRef<EntryDetailDrawerRef, {}>((_, ref) =
 									<IconRotateClockwise2 className="size-5" />
 									<span>
 										{entry.index}/
-										{entry.interval === 0 ? (
+										{entry.recurringConfig?.interval === 0 ? (
 											<IconInfinity className="inline" size={18} />
 										) : (
-											Math.round(entry.interval / (entry.config?.every ?? 1))
+											Math.round(entry.recurringConfig?.interval! / (entry.recurringConfig?.every ?? 1))
 										)}
 									</span>
 								</span>
@@ -121,11 +127,11 @@ export const EntryDetailDrawer = forwardRef<EntryDetailDrawerRef, {}>((_, ref) =
 					</DrawerDescription>
 					{preset === "custom" && (
 						<div className="text-left text-muted-foreground">
-							{m.RepeatsEvery()} {entry.config?.every} {entry.config?.frequency}
+							{m.RepeatsEvery()} {entry.recurringConfig?.every} {entry.recurringConfig?.frequency}
 						</div>
 					)}
 				</DrawerHeader>
-				<div className="text-left flex items-center justify-between px-4 border-b pb-3">
+				<div className="text-left flex items-center justify-between px-4 border-y bg-zinc-50 dark:bg-zinc-900/60 dark:border-zinc-800/50 border-zinc-200/70 py-3">
 					<p className="text-muted-foreground font-semibold">
 						{entry.details.type === "expense" ? m.PaidStatus() : m.IncomePaidStatus()}
 					</p>
@@ -139,7 +145,7 @@ export const EntryDetailDrawer = forwardRef<EntryDetailDrawerRef, {}>((_, ref) =
 				</div>
 				{!entry.recurringConfigId && (
 					<div className={cn("mx-4 py-1.5 relative flex items-center justify-between font-medium")}>
-						<div>{dayjs(entry.date).format("YYYY, MMMM")}</div>
+						<div>{dayjs(entry.date).format("DD MMM, YYYY")}</div>
 						<div>
 							<AmountDisplay
 								amount={entry.details.amount!}
@@ -153,7 +159,7 @@ export const EntryDetailDrawer = forwardRef<EntryDetailDrawerRef, {}>((_, ref) =
 				)}
 				{entry.recurringConfigId && (
 					<VerticalScrollView className="max-h-52 overflow-x-hidden gap-0 scrollGradient">
-						{history?.map((h, i) => {
+						{history?.map((h) => {
 							if (h.index < entry.index - 4 || h.index > entry.index + 11) {
 								return null;
 							}
@@ -188,7 +194,7 @@ export const EntryDetailDrawer = forwardRef<EntryDetailDrawerRef, {}>((_, ref) =
 										) : (
 											<IconPointFilled className="size-2 mx-0.5 text-muted-foreground" />
 										)}
-										{dayjs(h.date).format("YYYY, MMMM")}
+										{dayjs(h.date).format("DD MMM, YYYY")}
 									</div>
 									<div>
 										<AmountDisplay

@@ -160,5 +160,7 @@
 	"InvalidPrivateKey": "⚠ Geçersiz kişisel anahtar",
 	"PleaseEnterValidPrivateKey": "Lütfen geçerli bir kişisel anahtar girin",
 	"ExportData": "Verileri dışa aktar",
-	"Export": "Dışa aktar"
+	"Export": "Dışa aktar",
+	"Warning": "Dikkat!",
+	"FutureEntriesWillBeOverwritten": "Gelecekteki kayıtların üzerine yazılacak."
 }

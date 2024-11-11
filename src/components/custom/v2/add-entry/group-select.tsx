@@ -27,7 +27,7 @@ export function GroupSelect({
 	return (
 		<Drawer>
 			<DrawerTrigger asChild>
-				<Button variant="outline" className="justify-start shrink-0 rounded" disableScale>
+				<Button size="sm" variant="secondary">
 					<IconCategory2 className="-left-1.5 relative text-muted-foreground size-5 shrink-0" />
 					<span className="truncate max-w-24">
 						{groups.rows.find((g) => g.id === value)?.name || (
@@ -52,7 +52,7 @@ export function GroupSelect({
 							size="lg"
 							onClick={() => onValueChange("no-group")}
 						>
-							{m.Group()}
+							{m.Ungrouped()}
 							{!value && <IconCheck className="ml-auto size-5" />}
 						</Button>
 					</DrawerClose>

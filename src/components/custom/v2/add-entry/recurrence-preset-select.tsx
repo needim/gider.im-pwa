@@ -179,12 +179,7 @@ export function RecurrencePresetSelect({
 					setOpen(v);
 				}}
 			>
-				<Button
-					onClick={() => setOpen(true)}
-					variant="default"
-					className="justify-start grow rounded w-full"
-					disableScale
-				>
+				<Button size="sm" onClick={() => setOpen(true)} variant="secondary">
 					{selectedOption?.icon && <selectedOption.icon className="-left-1.5 size-5 relative" />}
 					<span className="truncate max-w-full">{selectedOption?.label}</span>
 				</Button>

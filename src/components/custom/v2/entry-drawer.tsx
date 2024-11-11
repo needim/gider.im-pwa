@@ -165,6 +165,7 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 			onOpenChange={(v) => {
 				setOpen(v);
 			}}
+			repositionInputs={false}
 		>
 			<DrawerContent className="standalone:pb-6 h-[99%] max-w-md mx-auto pb-2">
 				<DrawerHeader className="sr-only">
@@ -193,7 +194,7 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 							</AutoTextSize>
 						</div>
 						<Button
-							className="rounded absolute right-0"
+							className="rounded absolute right-1"
 							variant="link"
 							size="icon"
 							onClick={() =>
@@ -282,7 +283,7 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 							if (val) form.setValue("startDate", val!); // disable undefined
 						}}
 					>
-						<Button variant="outline" className="justify-start shrink rounded grow" disableScale>
+						<Button size="sm" variant="secondary" className="justify-start shrink grow">
 							<IconCalendarMonth className="-left-1.5 relative text-muted-foreground size-5" />
 							<span className="truncate">{dayjs(form.watch("startDate")).format("DD MMM, YY")}</span>
 						</Button>
@@ -320,7 +321,7 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 							key={char}
 							variant="secondary"
 							className={cn(
-								"text-3xl py-9 font-semibold rounded grow w-full",
+								"text-3xl py-8 font-semibold rounded grow w-full",
 								hideDecimalPoint && char === decimalChar && "hidden pointer-events-none",
 								hideDecimalPoint && char === 0 && "col-span-2",
 							)}
@@ -338,7 +339,7 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 					))}
 					<Button
 						variant="default"
-						className="text-3xl py-9 font-semibold rounded"
+						className="text-3xl py-8 font-semibold rounded"
 						onClick={form.handleSubmit(createEntry)}
 					>
 						✓

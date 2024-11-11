@@ -31,7 +31,7 @@ export function TagSelect({
 	return (
 		<Drawer>
 			<DrawerTrigger asChild>
-				<Button variant="outline" className="justify-start shrink-0 rounded" disableScale>
+				<Button size="sm" variant="secondary">
 					<IconTag className="-left-1.5 relative text-muted-foreground size-5 shrink-0" />
 					<span className="truncate max-w-24">
 						{selectedTag ? (
@@ -65,7 +65,7 @@ export function TagSelect({
 							size="lg"
 							onClick={() => onValueChange("no-tag")}
 						>
-							{m.Tag()}
+							{m.Untagged()}
 							{!value && <IconCheck className="ml-auto size-5" />}
 						</Button>
 					</DrawerClose>

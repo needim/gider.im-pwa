@@ -65,6 +65,8 @@ export const recurringConfigsQuery = (rId: TRecurringConfigId | null = null) =>
                 "id",
                 "recurringId",
                 "date",
+                "modifiedDate",
+                "index",
                 "reason",
                 "applyToSubsequents",
                 "modifiedEntryId",
@@ -161,7 +163,7 @@ export const recurringConfigsQuery = (rId: TRecurringConfigId | null = null) =>
               .where("entry.isDeleted", "is not", cast(true))
               .orderBy("entry.date", "asc")
               .$narrowType<TNarrowed>()
-          ).as("entry"),
+          ).as("originEntry"),
         ]),
     queryOptions
   );
@@ -263,6 +265,8 @@ export const exclusionsQuery = (recurringId: TRecurringConfigId) =>
           "modifiedEntryId",
           "applyToSubsequents",
           "date",
+          "modifiedDate",
+          "index",
           "reason",
         ])
         .where("isDeleted", "is not", cast(true))
@@ -315,37 +319,70 @@ export const generateOccurrences = (
   let occurenceForFuture: {
     amount: string;
     fullfilled: SqliteBoolean;
+    dayOfMonth: number | null;
   } | null = null;
 
   for (let i = 0; i < diff; i += every) {
     const currDate = dayjs(startDate).add(i, frequency);
 
     const isExcluded = exclusions.some(
-      (e) => currDate.isSame(dayjs(e.date), "day") && e.reason === "deletion"
+      (e) =>
+        (currDate.isSame(dayjs(e.date), "day") || e.index === i + 1) &&
+        e.reason === "deletion"
     );
 
     const isModified = exclusions.find(
       (e) =>
-        currDate.isSame(dayjs(e.date), "day") && e.reason === "modification"
+        (currDate.isSame(dayjs(e.date), "day") || e.index === i + 1) &&
+        e.reason === "modification"
     );
 
     if (isModified && !!isModified?.applyToSubsequents) {
       occurenceForFuture = {
         amount: isModified.modifiedEntry!.amount as TAmountString,
         fullfilled: decodeBoolean(0),
+        dayOfMonth: isModified.modifiedDate
+          ? dayjs(isModified.modifiedDate).date()
+          : null,
       };
     }
 
     if (!isExcluded) {
+      const modEntry = isModified
+        ? isModified.modifiedEntry
+        : occurenceForFuture
+        ? { ...recurringConfig.originEntry, ...occurenceForFuture }
+        : null;
+
+      // name, group, tag is shared between recurring entries
+      if (modEntry && recurringConfig.originEntry) {
+        modEntry.name = recurringConfig.originEntry.name;
+        modEntry.entryGroup = recurringConfig.originEntry.entryGroup;
+        modEntry.entryTag = recurringConfig.originEntry.entryTag;
+      }
+
+      let occDate = isModified?.modifiedDate
+        ? dayjs(isModified.modifiedDate).toDate()
+        : currDate.toDate();
+
+      if (occurenceForFuture?.dayOfMonth) {
+        let adjustedDate = dayjs(occDate).set(
+          "date",
+          occurenceForFuture.dayOfMonth
+        );
+
+        if (adjustedDate.month() !== currDate.month()) {
+          adjustedDate = dayjs(currDate).endOf("month");
+        }
+
+        if (!isModified?.modifiedDate) occDate = adjustedDate.toDate();
+      }
+
       occurences.push({
         index: i + 1,
-        date: currDate.toDate(),
+        date: occDate,
         exclusionId: isModified ? isModified.id : null,
-        modifiedEntry: isModified
-          ? isModified.modifiedEntry
-          : occurenceForFuture
-          ? { ...recurringConfig.entry, ...occurenceForFuture }
-          : null,
+        modifiedEntry: modEntry,
       });
     }
   }
@@ -365,21 +402,19 @@ export const populateEntries = (
     recurringConfigId: null | TRecurringConfigId;
     exclusionId: null | TExclusionId;
     index: number;
-    interval: number;
     date: Date;
-    config: null | TConfig;
+    recurringConfig: null | TConfig;
     details: NonNullable<TEntryRow | TModifiedEntry>;
   }> = [];
   type TConfig = (typeof recurringConfigs)[0];
 
-  recurringConfigs.forEach((recurringEntry) => {
-    const exclusions = recurringEntry.exclusions || [];
-    const occurrences = generateOccurrences(recurringEntry, exclusions);
-    console.log("occurrences", occurrences);
+  recurringConfigs.forEach((recurringConfig) => {
+    const exclusions = recurringConfig.exclusions || [];
+    const occurrences = generateOccurrences(recurringConfig, exclusions);
 
     occurrences.forEach((occ) => {
       const details = {
-        ...recurringEntry.entry,
+        ...recurringConfig.originEntry,
         ...occ.modifiedEntry,
       } as NonNullable<TEntryRow>;
 
@@ -388,12 +423,11 @@ export const populateEntries = (
       }
 
       entriesList.push({
-        recurringConfigId: recurringEntry.recurringConfigId,
+        recurringConfigId: recurringConfig.recurringConfigId,
+        recurringConfig,
         id: (occ.modifiedEntry?.entryId as TEntryId) || null,
         exclusionId: (occ.exclusionId as TExclusionId) || null,
         index: occ.index,
-        interval: recurringEntry.interval!,
-        config: recurringEntry,
         date: occ.date,
         details,
       });
@@ -403,11 +437,10 @@ export const populateEntries = (
   entries.forEach((entry) => {
     entriesList.push({
       id: entry.entryId,
-      index: 0,
-      interval: 0,
+      index: 1,
       exclusionId: null,
       recurringConfigId: null,
-      config: null,
+      recurringConfig: null,
       date: cast(entry.date!),
       details: entry,
     });
@@ -454,43 +487,7 @@ export const calculatedFullfilledTotals = (
   }, {} as Record<string, number>);
 };
 
-type TCALCULATIONS_OUTPUT = Record<
-  number,
-  {
-    month: Dayjs;
-    income: TPopulatedEntry[];
-    expense: TPopulatedEntry[];
-    assets: TPopulatedEntry[]; // not implemented yet
-    // ---
-    incomesGroupedByCurrency: Record<string, TPopulatedEntry[]>;
-    totalExpectedIncomeGroupedByCurrency: Record<string, number>;
-    totalReceivedIncomeGroupedByCurrency: Record<string, number>;
-    totalRemainingIncomeGroupedByCurrency: Record<string, number>;
-    // ---
-    expensesGroupedByCurrency: Record<string, TPopulatedEntry[]>;
-    totalExpectedExpenseGroupedByCurrency: Record<string, number>;
-    totalPaidExpenseGroupedByCurrency: Record<string, number>;
-    totalRemainingExpenseGroupedByCurrency: Record<string, number>;
-    // ---
-    result: {
-      inMainCurrency: {
-        actual: {
-          income: number;
-          expense: number;
-          total: number;
-        };
-        foresight: {
-          income: number;
-          expense: number;
-          total: number;
-        };
-      };
-      actual: Record<string, number>;
-      foresight: Record<string, number>;
-    };
-  }
->;
-export type TCALCULATIONS_OUTPUT_V2 = Record<
+export type TCALCULATIONS_OUTPUT = Record<
   number,
   {
     month: Dayjs;
@@ -537,221 +534,7 @@ export type TCALCULATIONS_OUTPUT_V2 = Record<
   }
 >;
 
-/**
- * @deprecated
- */
 export const getCalculations = ({
-  rates,
-  viewportStartDate,
-  viewportEndDate,
-  populatedEntries,
-  groupFilters,
-  tagFilters,
-}: {
-  rates: Record<string, number>;
-  viewportStartDate: dayjs.Dayjs;
-  viewportEndDate: dayjs.Dayjs;
-  populatedEntries: TPopulatedEntry[];
-  groupFilters?: (TGroupId | "no-group")[];
-  tagFilters?: (TTagId | "no-tag")[];
-  monthFilter?: string;
-}) => {
-  // console.time("getCalculations");
-  const CALCULATIONS: TCALCULATIONS_OUTPUT = {};
-
-  let month: Dayjs = viewportStartDate;
-  const totalMonthCount = viewportEndDate.diff(viewportStartDate, "month");
-  const mainCurrency = localStorage.getItem(storageKeys.mainCurrency) || "TRY"; // TODO: get it from args
-
-  if (groupFilters && groupFilters.length > 0) {
-    populatedEntries = populatedEntries.filter((entry) =>
-      groupFilters.includes(entry.details.groupId || "no-group")
-    );
-  }
-
-  if (tagFilters && tagFilters.length > 0) {
-    populatedEntries = populatedEntries.filter((entry) =>
-      tagFilters.includes(entry.details.tagId || "no-tag")
-    );
-  }
-
-  for (let i = 0; i <= totalMonthCount; i++) {
-    month = viewportStartDate.add(i, "month");
-    const monthEntries = populatedEntries.filter(
-      (e) =>
-        dayjs(e.date).month() === month.month() &&
-        dayjs(e.date).year() === month.year()
-    );
-
-    const income = monthEntries.filter((e) => e.details.type === "income");
-    const expense = monthEntries.filter((e) => e.details.type === "expense");
-
-    const incomesGroupedByCurrency = groupByCurrency(income);
-    const expensesGroupedByCurrency = groupByCurrency(expense);
-
-    const allUsedCurrencies = new Set([
-      ...Object.keys(incomesGroupedByCurrency),
-      ...Object.keys(expensesGroupedByCurrency),
-    ]);
-
-    const isDifferentCurrencyUsed = Array.from(allUsedCurrencies).some(
-      (currency) => currency !== mainCurrency
-    );
-
-    const totalExpectedIncomeGroupedByCurrency = calculateTotals(
-      incomesGroupedByCurrency
-    );
-    const totalReceivedIncomeGroupedByCurrency = calculatedFullfilledTotals(
-      incomesGroupedByCurrency
-    );
-
-    const totalExpectedExpenseGroupedByCurrency = calculateTotals(
-      expensesGroupedByCurrency
-    );
-
-    const totalPaidExpenseGroupedByCurrency = calculatedFullfilledTotals(
-      expensesGroupedByCurrency
-    );
-
-    const resultGroupedByCurrencyForesight = Object.entries(
-      totalExpectedIncomeGroupedByCurrency
-    ).reduce((acc, [currency]) => {
-      acc[currency] =
-        (totalExpectedIncomeGroupedByCurrency[currency] || 0) -
-        (totalExpectedExpenseGroupedByCurrency[currency] || 0);
-
-      return acc;
-    }, {} as Record<string, number>);
-
-    const resultGroupedByCurrency = Object.entries(
-      totalExpectedIncomeGroupedByCurrency
-    ).reduce((acc, [currency]) => {
-      acc[currency] =
-        (totalReceivedIncomeGroupedByCurrency[currency] || 0) -
-        (totalPaidExpenseGroupedByCurrency[currency] || 0);
-
-      return acc;
-    }, {} as Record<string, number>);
-
-    const missingCurrencies = Object.keys(
-      totalExpectedExpenseGroupedByCurrency
-    ).filter((currency) => !resultGroupedByCurrency.hasOwnProperty(currency));
-
-    const missingCurrenciesForsight = Object.keys(
-      totalExpectedExpenseGroupedByCurrency
-    ).filter(
-      (currency) => !resultGroupedByCurrencyForesight.hasOwnProperty(currency)
-    );
-
-    missingCurrencies.forEach((currency) => {
-      resultGroupedByCurrency[currency] =
-        -totalPaidExpenseGroupedByCurrency[currency];
-    });
-
-    missingCurrenciesForsight.forEach((currency) => {
-      resultGroupedByCurrencyForesight[currency] =
-        -totalExpectedExpenseGroupedByCurrency[currency];
-    });
-
-    let inMainCurrencyActualIncome = 0;
-    let inMainCurrencyForesightIncome = 0;
-    let inMainCurrencyActualExpense = 0;
-    let inMainCurrencyForsightExpense = 0;
-
-    if (isDifferentCurrencyUsed && Object.keys(rates).length > 0) {
-      inMainCurrencyActualIncome = Object.entries(
-        totalReceivedIncomeGroupedByCurrency
-      ).reduce((acc, [currency, amount]) => {
-        if (rates[currency]) acc += amount * rates[currency];
-        return acc;
-      }, 0);
-
-      inMainCurrencyActualExpense = Object.entries(
-        totalPaidExpenseGroupedByCurrency
-      ).reduce((acc, [currency, amount]) => {
-        if (rates[currency]) acc += amount * rates[currency];
-        return acc;
-      }, 0);
-
-      inMainCurrencyForesightIncome = Object.entries(
-        totalExpectedIncomeGroupedByCurrency
-      ).reduce((acc, [currency, amount]) => {
-        if (rates[currency]) acc += amount * rates[currency];
-        return acc;
-      }, 0);
-
-      inMainCurrencyForsightExpense = Object.entries(
-        totalExpectedExpenseGroupedByCurrency
-      ).reduce((acc, [currency, amount]) => {
-        if (rates[currency]) acc += amount * rates[currency];
-        return acc;
-      }, 0);
-    }
-
-    const inMainCurrency = isDifferentCurrencyUsed
-      ? {
-          actual: {
-            income: inMainCurrencyActualIncome,
-            expense: inMainCurrencyActualExpense,
-            total: inMainCurrencyActualIncome - inMainCurrencyActualExpense,
-          },
-          foresight: {
-            income: inMainCurrencyForesightIncome,
-            expense: inMainCurrencyForsightExpense,
-            total:
-              inMainCurrencyForesightIncome - inMainCurrencyForsightExpense,
-          },
-        }
-      : {
-          actual: {
-            income: totalReceivedIncomeGroupedByCurrency[mainCurrency],
-            expense: totalPaidExpenseGroupedByCurrency[mainCurrency],
-            total: resultGroupedByCurrency[mainCurrency],
-          },
-          foresight: {
-            income: totalExpectedIncomeGroupedByCurrency[mainCurrency],
-            expense: totalExpectedExpenseGroupedByCurrency[mainCurrency],
-            total: resultGroupedByCurrencyForesight[mainCurrency],
-          },
-        };
-
-    CALCULATIONS[i] = {
-      month,
-      income,
-      expense,
-      assets: [],
-      incomesGroupedByCurrency,
-      totalExpectedIncomeGroupedByCurrency,
-      totalReceivedIncomeGroupedByCurrency,
-      totalRemainingIncomeGroupedByCurrency: Object.entries(
-        totalExpectedIncomeGroupedByCurrency
-      ).reduce((acc, [currency, amount]) => {
-        acc[currency] =
-          amount - (totalReceivedIncomeGroupedByCurrency[currency] || 0);
-        return acc;
-      }, {} as Record<string, number>),
-      expensesGroupedByCurrency,
-      totalExpectedExpenseGroupedByCurrency,
-      totalPaidExpenseGroupedByCurrency,
-      totalRemainingExpenseGroupedByCurrency: Object.entries(
-        totalExpectedExpenseGroupedByCurrency
-      ).reduce((acc, [currency, amount]) => {
-        acc[currency] =
-          amount - (totalPaidExpenseGroupedByCurrency[currency] || 0);
-        return acc;
-      }, {} as Record<string, number>),
-      result: {
-        inMainCurrency,
-        actual: resultGroupedByCurrency,
-        foresight: resultGroupedByCurrencyForesight,
-      },
-    };
-  }
-  // console.timeEnd("getCalculations");
-  return CALCULATIONS;
-};
-
-export const getCalculations_v2 = ({
   rates,
   viewportStartDate,
   viewportEndDate,
@@ -769,7 +552,7 @@ export const getCalculations_v2 = ({
   mainCurrency: string;
 }) => {
   // console.time("getCalculations_v2");
-  const CALC: TCALCULATIONS_OUTPUT_V2 = {};
+  const CALC: TCALCULATIONS_OUTPUT = {};
 
   let month: Dayjs = viewportStartDate;
   const totalMonthCount = viewportEndDate.diff(viewportStartDate, "month");
@@ -910,8 +693,6 @@ export const getCalculations_v2 = ({
   return CALC;
 };
 
-export type TCalculations = ReturnType<typeof getCalculations>;
-
 export function getEntries<T extends object>(obj: T) {
   const mainCurrency = localStorage.getItem(storageKeys.mainCurrency) || "TRY";
   return Object.entries(obj).length
@@ -941,6 +722,8 @@ export function toggleFullfilled(entry: TPopulatedEntry) {
     evolu.create("exclusion", {
       recurringId: entry.recurringConfigId,
       date: entry.date,
+      modifiedDate: entry.date,
+      index: entry.index,
       reason: "modification",
       applyToSubsequents: false,
       modifiedEntryId: newEntry.id,
@@ -967,6 +750,7 @@ export async function deleteEntry(
     evolu.create("exclusion", {
       recurringId: entry.recurringConfigId!,
       date: entry.date,
+      index: entry.index,
       reason: "deletion",
       applyToSubsequents: withSubsequents,
       modifiedEntryId: null,
@@ -1006,7 +790,7 @@ export async function deleteEntry(
       evolu.update("recurringConfig", {
         id: entry.recurringConfigId,
         endDate: entry.date,
-        every: entry.config?.every || 1,
+        every: entry.recurringConfig?.every || 1,
         interval: entry.index - 1,
         isDeleted: entry.index - 1 === 0, // if it's the last one, mark as deleted
       });
@@ -1029,8 +813,6 @@ export async function getEntryHistory(entry: TPopulatedEntry) {
 
   const populatedEntries = populateEntries([], recurringConfig.rows);
 
-  console.log("popEntries", populatedEntries);
-
   return populatedEntries;
 }
 
@@ -1040,6 +822,7 @@ export async function editEntry(
   newAmount: string,
   newGroup: string | null,
   newTag: string | null,
+  newDate: Date | null,
   onComplete: () => void,
   applyToSubsequents = false
 ) {
@@ -1058,6 +841,7 @@ export async function editEntry(
         amount: decodeAmount(Number(newAmount).toFixed(8).toString()),
         groupId: newGroup as TGroupId | null,
         tagId: newTag as TTagId | null,
+        date: newDate ? dayjs(newDate).toDate() : entry.date,
       },
     });
 
@@ -1065,201 +849,128 @@ export async function editEntry(
     return;
   }
 
-  const newValues = {
-    name: decodeName(newName),
-    amount: decodeAmount(Number(newAmount).toFixed(8).toString()),
-    groupId: newGroup as TGroupId | null,
-    tagId: newTag as TTagId | null,
-  };
-
-  const isNameChanged = newName !== entry.details.name;
-  const isAmountChanged = newAmount !== entry.details.amount;
-
-  // if it's an exclusion (already edited)
-  if (entry.exclusionId && entry.details.entryId) {
-    evolu.update("entry", {
-      id: entry.details.entryId as TEntryId,
-      ...newValues,
-    });
-
-    // if its's a ghost record (there is no edit yet)
-  } else if (entry.recurringConfigId && !entry.exclusionId) {
-    // create a new entry and exclusion for that date
-    const newEntry = evolu.create("entry", {
-      ...entry.details,
-      ...newValues,
-      fullfilled: false, // there is no edit yet, so it's not fullfilled
-    });
-    evolu.create("exclusion", {
-      recurringId: entry.recurringConfigId,
-      date: entry.date,
-      reason: "modification",
-      modifiedEntryId: newEntry.id,
-      applyToSubsequents: applyToSubsequents,
-    });
-  }
-
-  if (applyToSubsequents && entry.recurringConfigId && entry.config) {
+  // if it's a recurring entry
+  if (entry.recurringConfigId) {
     const allExclusions = await evolu.loadQuery(
       exclusionsQuery(entry.recurringConfigId)
     );
 
-    // if we are modifiying the main entry and there is no occurrences just update the main entry
+    const isNameChanged = newName !== entry.details.name;
+    const isGroupChanged = newGroup !== entry.details.groupId;
+    const isTagChanged = newTag !== entry.details.tagId;
+    const isDateChanged =
+      newDate && !dayjs(newDate).isSame(dayjs(entry.date), "day");
+
+    const newValues = {
+      name: decodeName(newName),
+      amount: decodeAmount(Number(newAmount).toFixed(8).toString()),
+      groupId: newGroup as TGroupId | null,
+      tagId: newTag as TTagId | null,
+      // date: isDateChanged ? newDate : entry.details.date,
+    };
+
+    if (isNameChanged && entry.recurringConfig?.originEntry?.entryId) {
+      evolu.update("entry", {
+        id: entry.recurringConfig.originEntry.entryId as TEntryId,
+        name: decodeName(newName),
+      });
+    }
+
+    if (isGroupChanged && entry.recurringConfig?.originEntry?.entryId) {
+      evolu.update("entry", {
+        id: entry.recurringConfig.originEntry.entryId as TEntryId,
+        groupId: newGroup as TGroupId | null,
+      });
+    }
+
+    if (isTagChanged && entry.recurringConfig?.originEntry?.entryId) {
+      evolu.update("entry", {
+        id: entry.recurringConfig.originEntry.entryId as TEntryId,
+        tagId: newTag as TTagId | null,
+      });
+    }
+
+    // user created an recurring entry and then edited it immediately with applyToSubsequents
+    // we don't need to create a new entry and exclusion for that
+    // keep the db clean and update the original entry
     if (
+      applyToSubsequents &&
       allExclusions.rows.length === 0 &&
-      entry.details.entryId &&
-      entry.index === 1
+      entry.recurringConfig?.originEntry?.entryId &&
+      entry.index === 1 &&
+      entry.recurringConfig
     ) {
       evolu.update("entry", {
-        id: entry.details.entryId as TEntryId,
+        id: entry.recurringConfig.originEntry.entryId as TEntryId,
         ...newValues,
       });
+
+      // and if date is changed update the recurring config also
+      if (isDateChanged) {
+        evolu.update("recurringConfig", {
+          id: entry.recurringConfigId,
+          startDate: newDate,
+          endDate:
+            entry.recurringConfig.interval !== 0
+              ? dayjs(newDate)
+                  .add(
+                    Number(entry.recurringConfig.every),
+                    entry.recurringConfig.frequency
+                  )
+                  .toDate()
+              : null,
+        });
+      }
 
       onComplete();
       return;
     }
 
-    // delete all exclusions after this date
-    allExclusions.rows
-      .filter((ex) => dayjs(ex.date).isAfter(dayjs(entry.date)))
-      .map((ex) => {
-        evolu.update("exclusion", {
-          id: ex.exclusionId,
-          isDeleted: true,
-        });
+    // if exlusion exists modify it
+    if (entry.exclusionId && entry.details.entryId) {
+      evolu.update("entry", {
+        id: entry.details.entryId as TEntryId,
+        ...newValues,
       });
+      evolu.update("exclusion", {
+        id: entry.exclusionId,
+        modifiedDate: newDate,
+        applyToSubsequents,
+      });
+
+      // if its's a ghost record (there is no edit yet)
+    } else if (entry.recurringConfigId && !entry.exclusionId) {
+      // create a new entry and exclusion for that date
+      const newEntry = evolu.create("entry", {
+        ...entry.details,
+        ...newValues,
+        fullfilled: false, // there is no edit yet, so it's not fullfilled
+      });
+      evolu.create("exclusion", {
+        recurringId: entry.recurringConfigId,
+        date: entry.date,
+        modifiedDate: newDate,
+        index: entry.index,
+        reason: "modification",
+        modifiedEntryId: newEntry.id,
+        applyToSubsequents,
+      });
+    }
+
+    if (applyToSubsequents) {
+      allExclusions.rows
+        .filter((ex) => dayjs(ex.date).isAfter(dayjs(entry.date)))
+        .map((ex) => {
+          evolu.update("exclusion", {
+            id: ex.exclusionId,
+            isDeleted: true,
+          });
+        });
+    }
   }
 
   onComplete();
 }
-
-// export async function editEntry_backup(
-//   entry: TPopulatedEntry,
-//   newName: string,
-//   newAmount: string,
-//   newGroup: string | null,
-//   newTag: string | null,
-//   onComplete: () => void,
-//   applyToSubsequents = false
-// ) {
-//   if (!newName || newName.length === 0) return;
-//   if (!newAmount || newAmount.length === 0) return;
-
-//   newGroup = newGroup === "" ? null : newGroup;
-//   newTag = newTag === "" ? null : newTag;
-
-//   const newValues = {
-//     name: decodeName(newName),
-//     amount: decodeAmount(Number(newAmount).toFixed(8).toString()),
-//     groupId: newGroup as TGroupId | null,
-//     tagId: newTag as TTagId | null,
-//   };
-
-//   // if it's an exclusion
-//   if (entry.exclusionId && entry.details.entryId) {
-//     evolu.update("entry", {
-//       id: entry.details.entryId as TEntryId,
-//       ...newValues,
-//     });
-//     // if it's a single entry
-//   } else if (entry.id && !entry.recurringConfigId) {
-//     evolu.update("entry", {
-//       id: entry.id,
-//       ...newValues,
-//     });
-//     // if its's a ghost record
-//   } else if (entry.recurringConfigId && !entry.exclusionId) {
-//     // create a new entry and exclusion for that date
-//     const newEntry = evolu.create("entry", {
-//       ...entry.details,
-//       ...newValues,
-//       fullfilled: false,
-//     });
-//     evolu.create("exclusion", {
-//       recurringId: entry.recurringConfigId,
-//       date: entry.date,
-//       reason: "modification",
-//       modifiedEntryId: newEntry.id,
-//     });
-//   }
-
-//   if (applyToSubsequents && entry.recurringConfigId && entry.config) {
-//     const allExclusions = await evolu.loadQuery(
-//       exclusionsQuery(entry.recurringConfigId)
-//     );
-
-//     // if we are modifiying a main entry and there is no occurrences
-//     // just update the main entry
-//     if (
-//       allExclusions.rows.length === 0 &&
-//       entry.details.entryId
-//       // && entry.index === 1
-//     ) {
-//       evolu.update("entry", {
-//         id: entry.details.entryId as TEntryId,
-//         ...newValues,
-//       });
-
-//       onComplete();
-//       return;
-//     }
-
-//     // mark deletion to all exclusions after this date
-//     allExclusions.rows
-//       .filter((ex) => dayjs(ex.date).isAfter(dayjs(entry.date)))
-//       .map((ex) => {
-//         evolu.update("exclusion", {
-//           id: ex.exclusionId,
-//           reason: "deletion",
-//         });
-//       });
-
-//     // delete self
-//     evolu.create("exclusion", {
-//       recurringId: entry.recurringConfigId!,
-//       date: entry.date,
-//       reason: "deletion",
-//     });
-
-//     // stop old recurring config and delete if needed
-//     evolu.update("recurringConfig", {
-//       id: entry.recurringConfigId,
-//       endDate: entry.date,
-//       every: entry.config.every || 1,
-//       interval: entry.index - 1,
-//       isDeleted: entry.index - 1 === 0,
-//     });
-
-//     // create new recurring config
-//     const newRecurring = evolu.create("recurringConfig", {
-//       ...entry.config,
-//       startDate: entry.date,
-//       endDate: entry.config.endDate,
-//       every: entry.config.every || 1,
-//       interval: entry.config.interval
-//         ? entry.config.interval - entry.index + 1
-//         : 0,
-//     });
-
-//     // new entry
-//     const newModifiedEntry = evolu.create("entry", {
-//       ...entry.details,
-//       ...newValues,
-//       fullfilled: cast(!!entry.details.fullfilled),
-//       recurringId: newRecurring.id,
-//     });
-
-//     // create new exclusion
-//     evolu.create("exclusion", {
-//       recurringId: newRecurring.id,
-//       date: entry.date,
-//       reason: "modification",
-//       modifiedEntryId: newModifiedEntry.id,
-//     });
-//   }
-
-//   onComplete();
-// }
 
 export function sum(a: number, b: number) {
   return a + b;

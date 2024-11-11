@@ -29,11 +29,7 @@ export function EntryTypeSelect({
 	return (
 		<Drawer>
 			<DrawerTrigger asChild>
-				<Button
-					variant={value === "income" ? "positive" : "destructive"}
-					className="justify-start shrink-0 rounded"
-					disableScale
-				>
+				<Button size="sm" variant={value === "income" ? "positive" : "destructive"}>
 					{value === "income" && <IconArrowUpRight className="-left-1.5 relative size-4 shrink-0" />}
 					{value === "expense" && <IconArrowDownRight className="-left-1.5 relative size-4 shrink-0" />}
 					<span className="truncate max-w-24">{types.find((t) => t.value === value)?.label}</span>

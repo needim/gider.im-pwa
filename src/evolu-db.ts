@@ -86,6 +86,8 @@ const ExclusionTable = table({
   id: ExclusionId,
   recurringId: RecurringConfigId,
   date: SqliteDate,
+  index: S.NullOr(S.Number),
+  modifiedDate: S.NullOr(SqliteDate),
   reason: S.Union(S.Literal("deletion"), S.Literal("modification")),
   applyToSubsequents: SqliteBoolean,
   modifiedEntryId: S.NullOr(EntryId),

@@ -1,10 +1,10 @@
 import { ScreensContext } from "@/contexts/screens";
 import type { TGroupId, TTagId } from "@/evolu-db";
 import {
-	type TCALCULATIONS_OUTPUT_V2,
+	type TCALCULATIONS_OUTPUT,
 	type TPopulatedEntry,
 	entriesQuery,
-	getCalculations_v2,
+	getCalculations,
 	populateEntries,
 	recurringConfigsQuery,
 } from "@/evolu-queries";
@@ -32,22 +32,20 @@ export interface ScreensContextType {
 	viewportEndDate: dayjs.Dayjs;
 	isViewingCurrentMonth: boolean;
 	populatedEntries: TPopulatedEntry[];
-	CALCULATIONS: TCALCULATIONS_OUTPUT_V2;
+	CALCULATIONS: TCALCULATIONS_OUTPUT;
 	currentMonthIndex: number;
 	viewingIndex: number;
 	totalMonthCount: number;
 }
 
 export const ScreensProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-	// const [owner, setOwner] = useState(evolu.getOwner());
-	// const [error, setError] = useState(evolu.getError());
 	const recurringConfigs = useQuery(recurringConfigsQuery());
 	const entries = useQuery(entriesQuery());
+
 	const populatedEntries = useMemo(
 		() => populateEntries(entries.rows, recurringConfigs.rows),
 		[entries.rows, recurringConfigs.rows],
 	);
-	console.log("populatedEntries", populatedEntries);
 	// user can view 12 months into the past
 	const viewportStartDate = dayjs().startOf("month").subtract(12, "month");
 	// user can only view 12 months into the future
@@ -88,7 +86,7 @@ export const ScreensProvider: React.FC<{ children: ReactNode }> = ({ children })
 
 	const CALCULATIONS = useMemo(
 		() =>
-			getCalculations_v2({
+			getCalculations({
 				rates,
 				viewportStartDate,
 				viewportEndDate,

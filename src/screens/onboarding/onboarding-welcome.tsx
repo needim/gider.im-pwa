@@ -40,10 +40,7 @@ export default function OnboardingWelcome({
 				<motion.div variants={STAGGER_CHILD_VARIANTS}>
 					<Logo className="size-12 mb-4 will-change-transform" />
 				</motion.div>
-				<motion.h1
-					className="text-lg mt-12 mb-4"
-					variants={STAGGER_CHILD_VARIANTS}
-				>
+				<motion.h1 className="text-lg mt-12 mb-4" variants={STAGGER_CHILD_VARIANTS}>
 					{m.WelcomeTo()}
 				</motion.h1>
 
@@ -63,46 +60,25 @@ export default function OnboardingWelcome({
 					}}
 					className="mt-4 flex flex-col items-left flex-wrap gap-2"
 				>
-					<motion.div
-						variants={STAGGER_CHILD_VARIANTS}
-						className="flex items-center gap-1"
-					>
+					<motion.div variants={STAGGER_CHILD_VARIANTS} className="flex items-center gap-1">
 						<IconFreeRights size={20} /> {m.Free()}
 					</motion.div>
-					<motion.div
-						variants={STAGGER_CHILD_VARIANTS}
-						className="flex items-center gap-1"
-					>
+					<motion.div variants={STAGGER_CHILD_VARIANTS} className="flex items-center gap-1">
 						<IconLockSquare size={20} /> {m.PrivacyFirst()}
 					</motion.div>
-					<motion.div
-						variants={STAGGER_CHILD_VARIANTS}
-						className="flex items-center gap-1"
-					>
+					<motion.div variants={STAGGER_CHILD_VARIANTS} className="flex items-center gap-1">
 						<IconKey size={20} /> {m.Encrypted()}
 					</motion.div>
-					<motion.div
-						variants={STAGGER_CHILD_VARIANTS}
-						className="flex items-center gap-1"
-					>
+					<motion.div variants={STAGGER_CHILD_VARIANTS} className="flex items-center gap-1">
 						<IconCloudLock size={20} /> {m.LocalFirst()}
 					</motion.div>
-					<motion.div
-						variants={STAGGER_CHILD_VARIANTS}
-						className="flex items-center gap-1"
-					>
+					<motion.div variants={STAGGER_CHILD_VARIANTS} className="flex items-center gap-1">
 						<IconCookieOff size={20} /> {m.NoTracking()}
 					</motion.div>
-					<motion.div
-						variants={STAGGER_CHILD_VARIANTS}
-						className="flex items-center gap-1"
-					>
+					<motion.div variants={STAGGER_CHILD_VARIANTS} className="flex items-center gap-1">
 						<IconAdOff size={20} /> {m.NoAds()}
 					</motion.div>
-					<motion.div
-						variants={STAGGER_CHILD_VARIANTS}
-						className="flex items-center gap-1"
-					>
+					<motion.div variants={STAGGER_CHILD_VARIANTS} className="flex items-center gap-1">
 						<IconEyeOff size={20} /> {m.NoDataCollection()}
 					</motion.div>
 				</motion.div>

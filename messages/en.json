@@ -160,5 +160,7 @@
 	"InvalidPrivateKey": "⚠ Invalid private key",
 	"PleaseEnterValidPrivateKey": "Please enter a valid private key",
 	"ExportData": "Export data",
-	"Export": "Export"
+	"Export": "Export",
+	"Warning": "Warning!",
+	"FutureEntriesWillBeOverwritten": "Future entries will be overwritten."
 }
