@@ -23,7 +23,7 @@ export function DatePicker({
 					defaultMonth={value}
 					onSelect={onValueChange}
 					disableNavigation={mode === "day-change"}
-					showOutsideDays={mode !== "day-change"}
+					showOutsideDays={false}
 					initialFocus
 					weekStartsOn={1}
 				/>

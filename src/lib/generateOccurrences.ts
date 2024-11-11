@@ -41,8 +41,10 @@ export const generateOccurrences = (
     dayOfMonth: number | null;
   } | null = null;
 
+  let logicalIndex = 0;
   for (let i = 0; i < diff; i += every) {
     const currDate = dayjs(startDate).add(i, frequency);
+    logicalIndex++;
 
     const isExcluded = exclusions.some(
       (e) =>
@@ -98,7 +100,7 @@ export const generateOccurrences = (
       }
 
       occurences.push({
-        index: i + 1,
+        index: logicalIndex,
         date: occDate,
         exclusionId: isModified ? isModified.id : null,
         modifiedEntry: modEntry,
