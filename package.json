@@ -13,7 +13,7 @@
 		"postinstall": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide"
 	},
 	"dependencies": {
-		"@effect/schema": "^0.72.3",
+		"@effect/schema": "^0.75.0",
 		"@evolu/react": "^8.2.0",
 		"@fontsource-variable/inter": "^5.1.0",
 		"@fontsource-variable/roboto-mono": "^5.1.0",
