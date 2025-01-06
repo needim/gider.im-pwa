@@ -1,6 +1,6 @@
 import { useRegisterSW } from "virtual:pwa-register/react";
-import { ToastAction, ToastClose } from "@/components/ui/toast";
-import { useToast } from "@/components/ui/use-toast";
+//import { ToastAction, ToastClose } from "@/components/ui/toast";
+//import { useToast } from "@/components/ui/use-toast";
 import { useEffect } from "react";
 
 const PERIOD = 30 * 1000; // 30 seconds
@@ -22,7 +22,7 @@ function UpdatePrompt() {
 		},
 	});
 
-	const { toast } = useToast();
+	//const { toast } = useToast();
 
 	const close = () => setNeedRefresh(false);
 	const update = () => updateServiceWorker(true);
@@ -30,7 +30,7 @@ function UpdatePrompt() {
 	// biome-ignore lint/correctness/useExhaustiveDependencies: we don't need to add toast to the dependencies
 	useEffect(() => {
 		if (needRefresh) {
-			toast({
+			/*toast({
 				title: "New version 🎉",
 				description: "Reload to update the app.",
 				type: "background",
@@ -49,7 +49,7 @@ function UpdatePrompt() {
 						<ToastClose onClick={() => close()}>Dismiss</ToastClose>
 					</>
 				),
-			});
+			});*/
 		}
 	}, [needRefresh]);
 
