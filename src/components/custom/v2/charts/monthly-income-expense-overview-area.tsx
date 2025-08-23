@@ -53,7 +53,7 @@ export function MonthlyIncomeExpenseOverviewArea() {
 	return (
 		<div>
 			<div className="flex items-center justify-between px-4">
-				<p className="text-md font-semibold text-center">Monthly overview</p>
+				<p className="text-md font-semibold text-center">{m.MonthlyOverview()}</p>
 				<p className="text-muted-foreground text-xs text-center">
 					{chartData[0].month} - {chartData[chartData.length - 1]?.month}
 				</p>
