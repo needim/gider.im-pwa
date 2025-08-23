@@ -1,5 +1,6 @@
 import { BottomNavV2 } from "@/components/custom/v2/bottom-nav-v2";
 import { HeaderV2 } from "@/components/custom/v2/header-v2";
+import { useLocalization } from '@/hooks/use-localization.ts';
 import { storageKeys } from "@/lib/utils";
 import { ScreensProvider } from "@/providers/screens";
 import OnboardingWelcome from "@/screens/onboarding/onboarding-welcome";
@@ -11,6 +12,7 @@ import Confetti from "react-dom-confetti";
 import OnboardingSettings from "./onboarding-settings";
 
 export function OnboardingWrapper() {
+  const { m } = useLocalization();
 	const [step, setStep] = useLocalStorage(storageKeys.onboarding, 0);
 	const [firstShow, setFirstShow] = useLocalStorage(
 		storageKeys.firstShowAnimation,
@@ -70,7 +72,7 @@ export function OnboardingWrapper() {
 									}}
 								/>
 								<HeaderV2 />
-								<Suspense fallback={<div>Loading...</div>}>
+								<Suspense fallback={<div>{m.Loading()}</div>}>
 									<ScreenSwitcher />
 								</Suspense>
 								<BottomNavV2 />

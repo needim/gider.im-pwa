@@ -13,7 +13,7 @@ export function ScreenSwitcher() {
 	switch (activeScreen) {
 		case "assets":
 			return (
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<div>{m.Loading()}</div>}>
 					<div className="flex-1 h-svh flex items-center justify-center text-center">
 						<div className="text-balance mx-20">
 							<IconMaintenance className="mx-auto mb-4 scale-75 -left-8 relative dark:invert" />
@@ -25,19 +25,19 @@ export function ScreenSwitcher() {
 			);
 		case "insights":
 			return (
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<div>{m.Loading()}</div>}>
 					<InsightsScreen />
 				</Suspense>
 			);
 		case "settings":
 			return (
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<div>{m.Loading()}</div>}>
 					<SettingsScreen />
 				</Suspense>
 			);
 		default:
 			return (
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<div>{m.Loading()}</div>}>
 					<CalendarScreen />
 				</Suspense>
 			);
