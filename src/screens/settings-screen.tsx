@@ -63,7 +63,7 @@ export function SettingsScreen() {
 		<>
 			<div className="flex-1 h-svh overflow-y-auto py-4 relative">
 				<div className="px-4">
-					<div className="text-3xl font-bold mb-4">Settings</div>
+					<div className="text-3xl font-bold mb-4">{m.Settings()}</div>
 
 					<div className="flex flex-col gap-6 mb-4">
 						<div>
@@ -133,7 +133,7 @@ export function SettingsScreen() {
 						</div>
 
 						<div>
-							<h1 className="text-xs text-zinc-400 dark:text-zinc-600 uppercase font-bold mb-1">Data</h1>
+							<h1 className="text-xs text-zinc-400 dark:text-zinc-600 uppercase font-bold mb-1">{m.Data()}</h1>
 							<div className="px-2 -mx-2 text-sm flex flex-col gap-1">
 								{/* <SettingsRow Icon={IconSquareArrowDownFilled} iconBackground="bg-lime-500" title="Import data">
 									<Button
@@ -391,7 +391,7 @@ export function SettingsScreen() {
 						<span>gider.im v{__APP_VERSION__}</span>
 						<span>•</span>
 						<p>
-							Made by{" "}
+              {m.MadeBy()}{" "}
 							<a
 								href="https://x.com/needim"
 								target="_blank"
@@ -421,7 +421,7 @@ export function SettingsScreen() {
 							}}
 							className="underline"
 						>
-							Reload
+              {m.Reload()}
 						</button>
 					</div>
 				</div>
