@@ -160,5 +160,14 @@
 	"InvalidPrivateKey": "⚠ Geçersiz kişisel anahtar",
 	"PleaseEnterValidPrivateKey": "Lütfen geçerli bir kişisel anahtar girin",
 	"ExportData": "Verileri dışa aktar",
-	"Export": "Dışa aktar"
+	"Export": "Dışa aktar",
+    "Assets": "Varlıklar",
+    "AssetsDesc": "Varlıklarınızı ekleyerek net değerinizi takip edebileceksiniz.",
+    "Data": "Veriler",
+    "InProgress": "Geliştiriliyor...",
+    "Insights": "Analizler",
+    "Loading": "Yükleniyor...",
+    "MadeBy": "Geliştiren",
+    "MonthlyOverview": "Aylık genel bakış",
+    "Reload": "Uygulamayı yeniden yükle"
 }
