@@ -160,5 +160,14 @@
 	"InvalidPrivateKey": "⚠ Invalid private key",
 	"PleaseEnterValidPrivateKey": "Please enter a valid private key",
 	"ExportData": "Export data",
-	"Export": "Export"
+	"Export": "Export",
+    "Assets": "Assets",
+    "AssetsDesc": "You will add your assets to keep track of your net worth.",
+    "Data": "Data",
+    "InProgress": "In progress...",
+    "Insights": "Insights",
+    "Loading": "Loading...",
+    "MadeBy": "Made by",
+    "MonthlyOverview": "Monthly overview",
+    "Reload": "Reload the app"
 }

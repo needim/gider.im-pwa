@@ -121,6 +121,7 @@ export function LocalizationProvider({
 	);
 
 	useEffect(() => {
+    document.documentElement.lang = lang;
 		dayjs.locale(lang);
 	}, [lang]);
 
