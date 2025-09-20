@@ -25,7 +25,7 @@ My vision is to offer a reliable, free platform for managing personal finances t
 
 - Built with **React & Vite**
 - Styled with **TailwindCSS**
-- Powered by **[Evolu](https://github.com/evoluhq/evolu)**
+- Data stored via **[Supabase](https://supabase.com/)**
 - PWA (Progressive Web App) features for offline support
 
 ##  **Features**
@@ -60,6 +60,17 @@ My vision is to offer a reliable, free platform for managing personal finances t
 - [ ] **Investment Tracking**: Track your investments and monitor their performance.
 - [ ] **Net Worth Tracking**: Monitor your net worth over time.
 - [ ] **Financial Goals**: Set financial goals and track your progress.
+
+## Environment configuration
+
+Create a `.env.local` file in the project root to provide the Supabase credentials used by the application:
+
+```bash
+VITE_SUPABASE_URL=<your-supabase-project-url>
+VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
+```
+
+Restart the development server after updating these values.
 
 ## Socials
 

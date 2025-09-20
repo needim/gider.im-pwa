@@ -13,19 +13,10 @@ import { RecurrencePresetSelect } from "@/components/custom/v2/add-entry/recurre
 import { TagSelect } from "@/components/custom/v2/add-entry/tag-select";
 import { HorizontalScrollView } from "@/components/custom/v2/horizontal-scroll-view";
 import { Input } from "@/components/ui/input";
-import {
-	type TEvoluDB,
-	decodeAmount,
-	decodeCurrency,
-	decodeDate,
-	decodeGroupId,
-	decodeName,
-	decodeTagId,
-} from "@/evolu-db";
-import { groupsQuery, tagsQuery } from "@/evolu-queries";
+import { decodeAmount, decodeCurrency, decodeDate, decodeGroupId, decodeName, decodeTagId } from "@/evolu-db";
+import { useData } from "@/contexts/data";
 import { cn } from "@/lib/utils";
 import type { TEntryType } from "@/types";
-import { cast, useEvolu, useQuery } from "@evolu/react";
 import {
 	IconBackspaceFilled,
 	IconCalendarMonth,
@@ -50,18 +41,15 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 	const [open, setOpen] = useState(false);
 	const { lang, mainCurrency, decimalMode, decimal, getCurrency, m } = useLocalization();
 
-	const groups = useQuery(groupsQuery);
-	const tags = useQuery(tagsQuery);
-	const tagsCount = tags.rows.length;
-	const groupsCount = groups.rows.length;
+        const { groups, tags, createEntry: createEntryRecord, createRecurringConfig } = useData();
+        const tagsCount = tags.length;
+        const groupsCount = groups.length;
 
 	dayjs.locale(lang);
 	const decimalChar = decimalMode.includes("comma") ? "," : ".";
 	const hideDecimalPoint = decimal === 0;
 
-	const { create } = useEvolu<TEvoluDB>();
-
-	useImperativeHandle(ref, () => ({
+        useImperativeHandle(ref, () => ({
 		openDrawer: (_startDate, _type) => {
 			form.setValue("type", _type);
 			form.setValue("startDate", _startDate.toDate());
@@ -93,44 +81,49 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 		},
 	});
 
-	const createEntry = async (values: z.input<typeof EntryCreateSchema>) => {
-		if (values.type !== "assets") {
-			// TODO: add assets support
-			const now = dayjs();
-			// We are setting these for ordering purposes
-			values.startDate.setHours(now.hour(), now.minute(), now.second(), now.millisecond());
-			const recurringId =
-				values.mode === "one-time"
-					? null
-					: create("recurringConfig", {
-							frequency: values.recurrence!,
-							interval: values.interval!,
-							startDate: values.startDate,
-							every: values.every || 1,
-							endDate:
-								values.mode === "finite"
-									? dayjs(values.startDate).add(Number(values.every), values.recurrence).toDate()
-									: null,
-						}).id;
+        const handleCreateEntry = async (values: z.input<typeof EntryCreateSchema>) => {
+                if (values.type !== "assets") {
+                        // TODO: add assets support
+                        const now = dayjs();
+                        // We are setting these for ordering purposes
+                        values.startDate.setHours(now.hour(), now.minute(), now.second(), now.millisecond());
+                        let recurringId: string | null = null;
 
-			create("entry", {
-				type: values.type,
-				name: decodeName(values.name),
-				amount: decodeAmount(Number(values.amount).toFixed(8).toString()),
-				currencyCode: decodeCurrency(values.currency) || decodeCurrency(mainCurrency),
-				date: decodeDate(values.startDate.toISOString()),
-				groupId: values.group ? decodeGroupId(values.group) : null,
-				tagId: values.tag ? decodeTagId(values.tag) : null,
-				fullfilled: cast(false),
-				recurringId: recurringId,
-			});
-		}
+                        if (values.mode !== "one-time" && values.recurrence) {
+                                const endDate =
+                                        values.mode === "finite"
+                                                ? dayjs(values.startDate)
+                                                          .add(Number(values.every ?? 0), values.recurrence)
+                                                          .toISOString()
+                                                : null;
 
-		setOpen(false);
-		form.reset();
+                                recurringId = await createRecurringConfig({
+                                        frequency: values.recurrence,
+                                        interval: values.interval ?? 0,
+                                        every: values.every || 1,
+                                        startDate: values.startDate.toISOString(),
+                                        endDate,
+                                });
+                        }
 
-		return;
-	};
+                        await createEntryRecord({
+                                type: values.type,
+                                name: decodeName(values.name),
+                                amount: decodeAmount(Number(values.amount).toFixed(8).toString()),
+                                currencyCode: decodeCurrency(values.currency) || decodeCurrency(mainCurrency),
+                                date: decodeDate(values.startDate.toISOString()),
+                                groupId: values.group ? decodeGroupId(values.group) : null,
+                                tagId: values.tag ? decodeTagId(values.tag) : null,
+                                fullfilled: false,
+                                recurringId,
+                        });
+                }
+
+                setOpen(false);
+                form.reset();
+
+                return;
+        };
 
 	const backspaceIntervalId = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -352,7 +345,7 @@ export const EntryDrawer = forwardRef<EntryDrawerRef, {}>((_, ref) => {
 				<Button
 					variant="default"
 					className="text-3xl py-9 font-semibold rounded"
-					onClick={form.handleSubmit(createEntry)}
+                                    onClick={form.handleSubmit(handleCreateEntry)}
 				>
 					✓
 				</Button>

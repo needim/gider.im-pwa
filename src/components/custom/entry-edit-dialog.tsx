@@ -32,15 +32,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import {
-	type TPopulatedEntry,
-	deleteEntry,
-	editEntry,
-	groupsQuery,
-	tagsQuery,
-} from "@/evolu-queries";
+import { useEntryActions, useGroups, useTags } from "@/contexts/data";
+import type { TPopulatedEntry } from "@/evolu-queries";
 import { cn } from "@/lib/utils";
-import { useQuery } from "@evolu/react";
 import dayjs from "dayjs";
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 
@@ -50,11 +44,12 @@ export interface EntryEditDialogRef {
 }
 
 export const EntryEditDialog = forwardRef<EntryEditDialogRef, {}>((_, ref) => {
-	const [entry, setEntry] = useState<TPopulatedEntry>();
-	const groups = useQuery(groupsQuery);
-	const tags = useQuery(tagsQuery);
-	const tagsCount = tags.rows.length;
-	const groupsCount = groups.rows.length;
+        const [entry, setEntry] = useState<TPopulatedEntry>();
+        const groups = useGroups();
+        const tags = useTags();
+        const tagsCount = tags.length;
+        const groupsCount = groups.length;
+        const { deleteEntry, editEntry } = useEntryActions();
 
 	const [oName, setOName] = useState<string>(entry?.details.name || "");
 	const [oAmount, setOAmount] = useState<string>(entry?.details.amount || "");
@@ -148,7 +143,7 @@ export const EntryEditDialog = forwardRef<EntryEditDialogRef, {}>((_, ref) => {
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value="no-group">Group</SelectItem>
-										{groups.rows.map((group) => (
+                                                                                {groups.map((group) => (
 											<SelectItem key={group.id} value={group.id}>
 												{group.name}
 											</SelectItem>
@@ -172,7 +167,7 @@ export const EntryEditDialog = forwardRef<EntryEditDialogRef, {}>((_, ref) => {
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value="no-tag">Tag</SelectItem>
-										{tags.rows.map((tag) => (
+                                                                                {tags.map((tag) => (
 											<SelectItem key={tag.id} value={tag.id}>
 												<Tag
 													className="ml-0"
@@ -208,22 +203,21 @@ export const EntryEditDialog = forwardRef<EntryEditDialogRef, {}>((_, ref) => {
 					</div>
 
 					<div className="flex items-center gap-4 mt-4">
-						<Button
-							size="sm"
-							variant="default"
-							onClick={async () => {
-								await editEntry(
-									entry,
-									oName,
-									oAmount,
-									oGroup ? oGroup : null,
-									oTag ? oTag : null,
-									() => {},
-									applyToSubsequents,
-								);
-								setOpen(false);
-							}}
-						>
+                                                <Button
+                                                        size="sm"
+                                                        variant="default"
+                                                        onClick={async () => {
+                                                                await editEntry({
+                                                                        entry,
+                                                                        newName: oName,
+                                                                        newAmount: oAmount,
+                                                                        newGroup: oGroup ? oGroup : null,
+                                                                        newTag: oTag ? oTag : null,
+                                                                        applyToSubsequents,
+                                                                });
+                                                                setOpen(false);
+                                                        }}
+                                                >
 							{m.Save()}
 						</Button>
 
@@ -256,9 +250,8 @@ export const EntryEditDialog = forwardRef<EntryEditDialogRef, {}>((_, ref) => {
 									<DropdownMenuItem
 										onSelect={async () => {
 											setTimeout(() => {
-												deleteEntry(entry, false, () => {
-													setOpen(false);
-												});
+                                                                                void deleteEntry(entry, false);
+                                                                                setOpen(false);
 											}, 100);
 										}}
 									>
@@ -269,9 +262,8 @@ export const EntryEditDialog = forwardRef<EntryEditDialogRef, {}>((_, ref) => {
 										<DropdownMenuItem
 											onSelect={async () => {
 												setTimeout(() => {
-													deleteEntry(entry, true, () => {
-														setOpen(false);
-													});
+                                                                                void deleteEntry(entry, true);
+                                                                                setOpen(false);
 												}, 100);
 											}}
 										>

@@ -1,18 +1,11 @@
 import { ScreensContext } from "@/contexts/screens";
+import { useEntries, useRecurringConfigs } from "@/contexts/data";
 import type { TGroupId, TTagId } from "@/evolu-db";
-import {
-	type TCALCULATIONS_OUTPUT_V2,
-	type TPopulatedEntry,
-	entriesQuery,
-	getCalculations_v2,
-	populateEntries,
-	recurringConfigsQuery,
-} from "@/evolu-queries";
+import { type TCALCULATIONS_OUTPUT_V2, type TPopulatedEntry, getCalculations_v2, populateEntries } from "@/evolu-queries";
 import { useFilters } from "@/hooks/use-filters";
 import { useLocalization } from "@/hooks/use-localization";
 import { requestRates, storageKeys } from "@/lib/utils";
 import type { TCalendarVision, TEntryType, TScreenId } from "@/types";
-import { useQuery } from "@evolu/react";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import dayjs from "dayjs";
 import type React from "react";
@@ -41,12 +34,12 @@ export interface ScreensContextType {
 export const ScreensProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 	// const [owner, setOwner] = useState(evolu.getOwner());
 	// const [error, setError] = useState(evolu.getError());
-	const recurringConfigs = useQuery(recurringConfigsQuery);
-	const entries = useQuery(entriesQuery);
-	const populatedEntries = useMemo(
-		() => populateEntries(entries.rows, recurringConfigs.rows),
-		[entries.rows, recurringConfigs.rows],
-	);
+        const recurringConfigs = useRecurringConfigs();
+        const entries = useEntries();
+        const populatedEntries = useMemo(
+                () => populateEntries(entries, recurringConfigs),
+                [entries, recurringConfigs],
+        );
 	// user can view 12 months into the past
 	const viewportStartDate = dayjs().startOf("month").subtract(12, "month");
 	// user can only view 12 months into the future

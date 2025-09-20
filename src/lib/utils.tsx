@@ -1,6 +1,5 @@
 import type { TDecimalMode } from "@/providers/localization";
 import type { Theme } from "@/providers/theme";
-import type { Mnemonic } from "@evolu/react";
 import * as bip39 from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english";
 import { type ClassValue, clsx } from "clsx";
@@ -257,19 +256,20 @@ export const defaultCurrencyDecimalPlaces = new Map([
 const storagePrefix = "giderim";
 
 export const storageKeys = {
-	lang: `${storagePrefix}-lang`,
-	theme: `${storagePrefix}-theme`,
-	mainCurrency: `${storagePrefix}-main-currency`,
-	decimal: `${storagePrefix}-decimal`,
-	decimalMode: `${storagePrefix}-decimal-mode`,
-	tinyDecimal: `${storagePrefix}-tiny-decimal`,
-	monthTabs: `${storagePrefix}-month-tabs`, // @deprecated
-	onboarding: `${storagePrefix}-onboarding`,
-	firstShowAnimation: `${storagePrefix}-first-show-animation`,
-	activeScreen: `${storagePrefix}-active-screen`,
-	calendarType: `${storagePrefix}-calendar-type`,
-	calendarVision: `${storagePrefix}-calendar-vision`,
-	calendarIndex: `${storagePrefix}-calendar-index`,
+        lang: `${storagePrefix}-lang`,
+        theme: `${storagePrefix}-theme`,
+        mainCurrency: `${storagePrefix}-main-currency`,
+        decimal: `${storagePrefix}-decimal`,
+        decimalMode: `${storagePrefix}-decimal-mode`,
+        tinyDecimal: `${storagePrefix}-tiny-decimal`,
+        monthTabs: `${storagePrefix}-month-tabs`, // @deprecated
+        onboarding: `${storagePrefix}-onboarding`,
+        firstShowAnimation: `${storagePrefix}-first-show-animation`,
+        activeScreen: `${storagePrefix}-active-screen`,
+        calendarType: `${storagePrefix}-calendar-type`,
+        calendarVision: `${storagePrefix}-calendar-vision`,
+        calendarIndex: `${storagePrefix}-calendar-index`,
+        privateKey: `${storagePrefix}-private-key`,
 };
 
 export async function minDelay<T>(promise: Promise<T>, ms: number) {
@@ -291,8 +291,8 @@ export const STAGGER_CHILD_VARIANTS = {
 };
 
 export const validateMnemonic = (mnemonic: string) => {
-	const mnemonicTrimmed = mnemonic.trim();
-	return bip39.validateMnemonic(mnemonicTrimmed, wordlist) ? (mnemonicTrimmed as Mnemonic) : null;
+        const mnemonicTrimmed = mnemonic.trim();
+        return bip39.validateMnemonic(mnemonicTrimmed, wordlist) ? mnemonicTrimmed : null;
 };
 
 export function setThemeColor(theme: Theme) {

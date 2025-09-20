@@ -9,9 +9,8 @@ import {
 	DrawerTitle,
 } from "@/components/ui/drawer";
 import { useToast } from "@/components/ui/use-toast";
-import { evolu } from "@/evolu-db";
 import { useLocalization } from "@/hooks/use-localization";
-import { validateMnemonic } from "@/lib/utils";
+import { storageKeys, validateMnemonic } from "@/lib/utils";
 import { IconCloudDownload } from "@tabler/icons-react";
 import { forwardRef, useImperativeHandle, useState } from "react";
 
@@ -70,13 +69,20 @@ export const RestoreKeyDrawer = forwardRef<RestoreKeyDrawerRef, {}>((_, ref) => 
 								});
 								return;
 							}
-							setRestoring(true);
-							evolu.restoreOwner(validKey, {
-								reload: true,
-							});
-						}}
-					>
-						{restoring ? m.Restoring() : m.Restore()}
+                                                        setRestoring(true);
+                                                        localStorage.setItem(storageKeys.privateKey, validKey);
+                                                        setRestoring(false);
+                                                        setOpen(false);
+                                                        setRestoreKey("");
+                                                        toast({
+                                                                title: m.PrivateKey(),
+                                                                description: m.RestoreWithPrivateKeyDesc(),
+                                                                type: "foreground",
+                                                                duration: 3000,
+                                                        });
+                                                }}
+                                        >
+                                                {restoring ? m.Restoring() : m.Restore()}
 					</Button>
 				</DrawerFooter>
 			</DrawerContent>

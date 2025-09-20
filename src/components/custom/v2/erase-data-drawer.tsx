@@ -8,7 +8,7 @@ import {
 	DrawerHeader,
 	DrawerTitle,
 } from "@/components/ui/drawer";
-import { evolu } from "@/evolu-db";
+import { useData } from "@/contexts/data";
 import { useLocalization } from "@/hooks/use-localization";
 import { IconTrashXFilled } from "@tabler/icons-react";
 import { forwardRef, useImperativeHandle, useState } from "react";
@@ -19,8 +19,9 @@ export interface EraseDataDrawerRef {
 }
 
 export const EraseDataDrawer = forwardRef<EraseDataDrawerRef, {}>((_, ref) => {
-	const [open, setOpen] = useState(false);
-	const { m } = useLocalization();
+        const [open, setOpen] = useState(false);
+        const { m } = useLocalization();
+        const { eraseAllData } = useData();
 
 	useImperativeHandle(ref, () => ({
 		openDrawer: () => {
@@ -43,11 +44,11 @@ export const EraseDataDrawer = forwardRef<EraseDataDrawerRef, {}>((_, ref) => {
 					<Button
 						variant="destructive"
 						size="lg"
-						onClick={async () => {
-							await evolu.resetOwner({ reload: false });
-							window.localStorage.clear();
-							window.location.reload();
-						}}
+                                                onClick={async () => {
+                                                        await eraseAllData();
+                                                        window.localStorage.clear();
+                                                        window.location.reload();
+                                                }}
 					>
 						{m.EraseAllDataAndStartOver()}
 					</Button>

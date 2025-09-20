@@ -14,7 +14,6 @@
 	},
 	"dependencies": {
 		"@effect/schema": "^0.72.3",
-		"@evolu/react": "^8.2.0",
 		"@fontsource-variable/inter": "^5.1.0",
 		"@fontsource-variable/roboto-mono": "^5.1.0",
 		"@hookform/resolvers": "^3.9.0",
@@ -60,9 +59,9 @@
 		"tailwindcss-animate": "^1.0.7",
 		"tailwindcss-displaymodes": "^1.0.8",
 		"unplugin-fonts": "^1.1.1",
-		"vaul": "^1.0.0",
-		"workbox-window": "^7.1.0",
-		"zod": "^3.23.8"
+                "vaul": "^1.0.0",
+                "workbox-window": "^7.1.0",
+                "zod": "^3.23.8"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.2",
