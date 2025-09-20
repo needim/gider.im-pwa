@@ -1,52 +1,59 @@
+import {
+        createClient,
+        type PostgrestError,
+        type PostgrestMaybeSingleResponse,
+        type PostgrestResponse,
+        type PostgrestSingleResponse,
+        type SupabaseClient,
+} from "@supabase/supabase-js";
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+let supabase: SupabaseClient | null = null;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+        console.warn("Supabase environment variables are not configured.");
+} else {
+        supabase = createClient(supabaseUrl, supabaseAnonKey, {
+                auth: { persistSession: false },
+        });
+}
+
+type PostgrestResult<T> =
+        | PostgrestResponse<T>
+        | PostgrestSingleResponse<T>
+        | PostgrestMaybeSingleResponse<T>;
 
 export interface SupabaseResponse<T> {
         data: T | null;
         error: Error | null;
 }
 
-const createHeaders = () => {
-        if (!supabaseUrl || !supabaseAnonKey) {
-                console.warn("Supabase environment variables are not configured.");
-                return null;
-        }
-
-        return {
-                apikey: supabaseAnonKey,
-                Authorization: `Bearer ${supabaseAnonKey}`,
-        } satisfies Record<string, string>;
+const toError = (error: PostgrestError) => {
+        const details = error.details ? `: ${error.details}` : "";
+        const supabaseError = new Error(`${error.message}${details}`);
+        supabaseError.name = "SupabaseError";
+        return supabaseError;
 };
 
-export const supabaseRequest = async <T>(path: string, init: RequestInit = {}): Promise<SupabaseResponse<T>> => {
-        const headers = createHeaders();
-        if (!supabaseUrl || !headers) {
-                return { data: null, error: new Error("Supabase environment variables are not configured.") };
+export const supabaseRequest = async <T>(
+        callback: (client: SupabaseClient) => Promise<PostgrestResult<T>>,
+): Promise<SupabaseResponse<T>> => {
+        if (!supabase) {
+                return {
+                        data: null,
+                        error: new Error("Supabase environment variables are not configured."),
+                };
         }
 
-        const requestHeaders = new Headers({
-                ...headers,
-                "Content-Type": "application/json",
-                ...init.headers,
-        });
-
         try {
-                const response = await fetch(`${supabaseUrl}/rest/v1/${path}`, {
-                        ...init,
-                        headers: requestHeaders,
-                });
-
-                if (!response.ok) {
-                        const message = await response.text();
-                        return { data: null, error: new Error(message || response.statusText) };
+                const result = await callback(supabase);
+                if (result.error) {
+                        return { data: null, error: toError(result.error) };
                 }
 
-                if (response.status === 204) {
-                        return { data: null, error: null };
-                }
-
-                const data = (await response.json()) as T;
-                return { data, error: null };
+                return { data: (result.data as T) ?? null, error: null };
         } catch (error) {
                 return { data: null, error: error as Error };
         }

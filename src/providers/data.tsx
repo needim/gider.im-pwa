@@ -153,7 +153,9 @@ const mapExclusionRow = (
 };
 
 const fetchGroups = async (): Promise<TGroupRow[]> => {
-        const { data, error } = await supabaseRequest<RawGroupRow[]>(`${TABLES.entryGroup}?select=*&order=created_at.asc`);
+        const { data, error } = await supabaseRequest<RawGroupRow[]>((client) =>
+                client.from<RawGroupRow>(TABLES.entryGroup).select("*").order("created_at", { ascending: true }),
+        );
         if (error) {
                 console.error("Failed to fetch groups", error);
                 return [];
@@ -163,7 +165,9 @@ const fetchGroups = async (): Promise<TGroupRow[]> => {
 };
 
 const fetchTags = async (): Promise<TTagRow[]> => {
-        const { data, error } = await supabaseRequest<RawTagRow[]>(`${TABLES.entryTag}?select=*&order=created_at.asc`);
+        const { data, error } = await supabaseRequest<RawTagRow[]>((client) =>
+                client.from<RawTagRow>(TABLES.entryTag).select("*").order("created_at", { ascending: true }),
+        );
         if (error) {
                 console.error("Failed to fetch tags", error);
                 return [];
@@ -176,8 +180,12 @@ const fetchEntries = async (
         groupsMap: Map<string, TGroupRow>,
         tagsMap: Map<string, TTagRow>,
 ): Promise<TEntryRow[]> => {
-        const { data, error } = await supabaseRequest<RawEntryRow[]>(
-                `${TABLES.entry}?select=*&recurring_id=is.null&order=date.asc`,
+        const { data, error } = await supabaseRequest<RawEntryRow[]>((client) =>
+                client
+                        .from<RawEntryRow>(TABLES.entry)
+                        .select("*")
+                        .is("recurring_id", null)
+                        .order("date", { ascending: true }),
         );
 
         if (error) {
@@ -194,8 +202,11 @@ const fetchRecurringConfigs = async (
         groupsMap: Map<string, TGroupRow>,
         tagsMap: Map<string, TTagRow>,
 ): Promise<TRecurringConfigRow[]> => {
-        const { data, error } = await supabaseRequest<RawRecurringConfigRow[]>(
-                `${TABLES.recurringConfig}?select=*&order=created_at.asc`,
+        const { data, error } = await supabaseRequest<RawRecurringConfigRow[]>((client) =>
+                client
+                        .from<RawRecurringConfigRow>(TABLES.recurringConfig)
+                        .select("*")
+                        .order("created_at", { ascending: true }),
         );
 
         if (error) {
@@ -209,8 +220,8 @@ const fetchRecurringConfigs = async (
         const configIds = configs.map((row) => row.id);
 
         const inQuery = configIds.map((id) => `"${id}"`).join(",");
-        const { data: recurringEntriesData, error: recurringEntriesError } = await supabaseRequest<RawEntryRow[]>(
-                `${TABLES.entry}?select=*&recurring_id=in.(${inQuery})`,
+        const { data: recurringEntriesData, error: recurringEntriesError } = await supabaseRequest<RawEntryRow[]>((client) =>
+                client.from<RawEntryRow>(TABLES.entry).select("*").in("recurring_id", configIds),
         );
 
         if (recurringEntriesError) {
@@ -227,8 +238,8 @@ const fetchRecurringConfigs = async (
                 entriesById.set(entry.entryId, entry);
         });
 
-        const { data: exclusionsData, error: exclusionsError } = await supabaseRequest<RawExclusionRow[]>(
-                `${TABLES.exclusion}?select=*&recurring_id=in.(${inQuery})`,
+        const { data: exclusionsData, error: exclusionsError } = await supabaseRequest<RawExclusionRow[]>((client) =>
+                client.from<RawExclusionRow>(TABLES.exclusion).select("*").in("recurring_id", configIds),
         );
 
         if (exclusionsError) {
@@ -308,10 +319,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         const createGroup = useCallback(
                 async (name: string) => {
                         await withRefresh(async () => {
-                                const { error } = await supabaseRequest(`${TABLES.entryGroup}`, {
-                                        method: "POST",
-                                        body: JSON.stringify({ name }),
-                                });
+                                const { error } = await supabaseRequest((client) =>
+                                        client.from(TABLES.entryGroup).insert({ name }),
+                                );
                                 if (error) throw error;
                         });
                 },
@@ -321,10 +331,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         const deleteGroup = useCallback(
                 async (id: string) => {
                         await withRefresh(async () => {
-                                const { error } = await supabaseRequest(`${TABLES.entryGroup}?id=eq.${id}`, {
-                                        method: "PATCH",
-                                        body: JSON.stringify({ is_deleted: true }),
-                                });
+                                const { error } = await supabaseRequest((client) =>
+                                        client.from(TABLES.entryGroup).update({ is_deleted: true }).eq("id", id),
+                                );
                                 if (error) throw error;
                         });
                 },
@@ -334,14 +343,13 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         const createTag = useCallback(
                 async (input: TagInput) => {
                         await withRefresh(async () => {
-                                const { error } = await supabaseRequest(`${TABLES.entryTag}`, {
-                                        method: "POST",
-                                        body: JSON.stringify({
+                                const { error } = await supabaseRequest((client) =>
+                                        client.from(TABLES.entryTag).insert({
                                                 name: input.name,
                                                 color: input.color,
                                                 suggest_id: input.suggestId,
                                         }),
-                                });
+                                );
                                 if (error) throw error;
                         });
                 },
@@ -351,10 +359,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         const updateTagColor = useCallback(
                 async (id: string, color: string | null) => {
                         await withRefresh(async () => {
-                                const { error } = await supabaseRequest(`${TABLES.entryTag}?id=eq.${id}`, {
-                                        method: "PATCH",
-                                        body: JSON.stringify({ color }),
-                                });
+                                const { error } = await supabaseRequest((client) =>
+                                        client.from(TABLES.entryTag).update({ color }).eq("id", id),
+                                );
                                 if (error) throw error;
                         });
                 },
@@ -364,10 +371,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         const deleteTag = useCallback(
                 async (id: string) => {
                         await withRefresh(async () => {
-                                const { error } = await supabaseRequest(`${TABLES.entryTag}?id=eq.${id}`, {
-                                        method: "PATCH",
-                                        body: JSON.stringify({ is_deleted: true }),
-                                });
+                                const { error } = await supabaseRequest((client) =>
+                                        client.from(TABLES.entryTag).update({ is_deleted: true }).eq("id", id),
+                                );
                                 if (error) throw error;
                         });
                 },
@@ -376,21 +382,23 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
         const createEntry = useCallback(
                 async (input: CreateEntryInput, options?: MutationOptions) => {
-                        const { data, error } = await supabaseRequest<{ id: string }[]>(`${TABLES.entry}`, {
-                                method: "POST",
-                                body: JSON.stringify({
-                                        name: input.name,
-                                        amount: input.amount,
-                                        currency_code: input.currencyCode,
-                                        date: input.date,
-                                        type: input.type,
-                                        group_id: input.groupId,
-                                        tag_id: input.tagId,
-                                        fullfilled: input.fullfilled,
-                                        recurring_id: input.recurringId,
-                                }),
-                                headers: { Prefer: "return=representation" },
-                        });
+                        const { data, error } = await supabaseRequest<{ id: string }>((client) =>
+                                client
+                                        .from(TABLES.entry)
+                                        .insert({
+                                                name: input.name,
+                                                amount: input.amount,
+                                                currency_code: input.currencyCode,
+                                                date: input.date,
+                                                type: input.type,
+                                                group_id: input.groupId,
+                                                tag_id: input.tagId,
+                                                fullfilled: input.fullfilled,
+                                                recurring_id: input.recurringId,
+                                        })
+                                        .select("id")
+                                        .single(),
+                        );
 
                         if (error) {
                                 console.error("Failed to create entry", error);
@@ -400,24 +408,26 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
                         if (shouldRefresh(options)) {
                                 await refresh();
                         }
-                        return data?.[0]?.id ?? null;
+                        return data?.id ?? null;
                 },
                 [refresh],
         );
 
         const createRecurringConfig = useCallback(
                 async (input: CreateRecurringConfigInput, options?: MutationOptions) => {
-                        const { data, error } = await supabaseRequest<{ id: string }[]>(`${TABLES.recurringConfig}`, {
-                                method: "POST",
-                                body: JSON.stringify({
-                                        frequency: input.frequency,
-                                        interval: input.interval,
-                                        every: input.every,
-                                        start_date: input.startDate,
-                                        end_date: input.endDate,
-                                }),
-                                headers: { Prefer: "return=representation" },
-                        });
+                        const { data, error } = await supabaseRequest<{ id: string }>((client) =>
+                                client
+                                        .from(TABLES.recurringConfig)
+                                        .insert({
+                                                frequency: input.frequency,
+                                                interval: input.interval,
+                                                every: input.every,
+                                                start_date: input.startDate,
+                                                end_date: input.endDate,
+                                        })
+                                        .select("id")
+                                        .single(),
+                        );
 
                         if (error) {
                                 console.error("Failed to create recurring config", error);
@@ -427,7 +437,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
                         if (shouldRefresh(options)) {
                                 await refresh();
                         }
-                        return data?.[0]?.id ?? null;
+                        return data?.id ?? null;
                 },
                 [refresh],
         );
@@ -439,16 +449,18 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
                         reason: "deletion" | "modification";
                         modifiedEntryId: string | null;
                 }, options?: MutationOptions) => {
-                        const { data, error } = await supabaseRequest<{ id: string }[]>(`${TABLES.exclusion}`, {
-                                method: "POST",
-                                body: JSON.stringify({
-                                        recurring_id: input.recurringId,
-                                        date: input.date,
-                                        reason: input.reason,
-                                        modified_entry_id: input.modifiedEntryId,
-                                }),
-                                headers: { Prefer: "return=representation" },
-                        });
+                        const { data, error } = await supabaseRequest<{ id: string }>((client) =>
+                                client
+                                        .from(TABLES.exclusion)
+                                        .insert({
+                                                recurring_id: input.recurringId,
+                                                date: input.date,
+                                                reason: input.reason,
+                                                modified_entry_id: input.modifiedEntryId,
+                                        })
+                                        .select("id")
+                                        .single(),
+                        );
 
                         if (error) {
                                 console.error("Failed to create exclusion", error);
@@ -458,7 +470,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
                         if (shouldRefresh(options)) {
                                 await refresh();
                         }
-                        return data?.[0]?.id ?? null;
+                        return data?.id ?? null;
                 },
                 [refresh],
         );
@@ -481,10 +493,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
                                 recurring_id: values.recurringId,
                         });
 
-                        const { error } = await supabaseRequest(`${TABLES.entry}?id=eq.${id}`, {
-                                method: "PATCH",
-                                body: JSON.stringify(payload),
-                        });
+                        const { error } = await supabaseRequest((client) =>
+                                client.from(TABLES.entry).update(payload).eq("id", id),
+                        );
 
                         if (error) {
                                 console.error("Failed to update entry", error);
@@ -516,10 +527,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
                                 is_deleted: values.isDeleted ?? undefined,
                         });
 
-                        const { error } = await supabaseRequest(`${TABLES.recurringConfig}?id=eq.${id}`, {
-                                method: "PATCH",
-                                body: JSON.stringify(payload),
-                        });
+                        const { error } = await supabaseRequest((client) =>
+                                client.from(TABLES.recurringConfig).update(payload).eq("id", id),
+                        );
 
                         if (error) {
                                 console.error("Failed to update recurring config", error);
@@ -544,10 +554,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
                                 is_deleted: values.isDeleted ?? undefined,
                         });
 
-                        const { error } = await supabaseRequest(`${TABLES.exclusion}?id=eq.${id}`, {
-                                method: "PATCH",
-                                body: JSON.stringify(payload),
-                        });
+                        const { error } = await supabaseRequest((client) =>
+                                client.from(TABLES.exclusion).update(payload).eq("id", id),
+                        );
 
                         if (error) {
                                 console.error("Failed to update exclusion", error);
@@ -624,68 +633,82 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         const deleteEntry = useCallback(
                 async (entry: TPopulatedEntry, withSubsequents = false) => {
                         if (entry.exclusionId) {
-                                await supabaseRequest(`${TABLES.exclusion}?id=eq.${entry.exclusionId}`, {
-                                        method: "PATCH",
-                                        body: JSON.stringify({ reason: "deletion" }),
-                                });
+                                await supabaseRequest((client) =>
+                                        client
+                                                .from(TABLES.exclusion)
+                                                .update({ reason: "deletion" })
+                                                .eq("id", entry.exclusionId),
+                                );
                         } else if (entry.id && !entry.recurringConfigId) {
-                                await supabaseRequest(`${TABLES.entry}?id=eq.${entry.id}`, {
-                                        method: "PATCH",
-                                        body: JSON.stringify({ is_deleted: true }),
-                                });
+                                await supabaseRequest((client) =>
+                                        client
+                                                .from(TABLES.entry)
+                                                .update({ is_deleted: true })
+                                                .eq("id", entry.id!),
+                                );
                         } else if (entry.recurringConfigId) {
-                                await supabaseRequest(`${TABLES.exclusion}`, {
-                                        method: "POST",
-                                        body: JSON.stringify({
-                                                recurring_id: entry.recurringConfigId,
+                                await supabaseRequest((client) =>
+                                        client.from(TABLES.exclusion).insert({
+                                                recurring_id: entry.recurringConfigId!,
                                                 date: entry.date.toISOString(),
                                                 reason: "deletion",
                                                 modified_entry_id: null,
                                         }),
-                                        headers: { Prefer: "return=representation" },
-                                });
+                                );
                         }
 
                         if (withSubsequents && entry.recurringConfigId) {
-                                const { data: exclusionsData } = await supabaseRequest<RawExclusionRow[]>(
-                                        `${TABLES.exclusion}?select=*&recurring_id=eq.${entry.recurringConfigId}&is_deleted=is.false`,
+                                const { data: exclusionsData } = await supabaseRequest<RawExclusionRow[]>((client) =>
+                                        client
+                                                .from<RawExclusionRow>(TABLES.exclusion)
+                                                .select("*")
+                                                .eq("recurring_id", entry.recurringConfigId!)
+                                                .eq("is_deleted", false),
                                 );
 
                                 const exclusions = (exclusionsData ?? []).map((row) => row as RawExclusionRow);
 
                                 if (entry.index <= 1) {
-                                        await supabaseRequest(`${TABLES.recurringConfig}?id=eq.${entry.recurringConfigId}`, {
-                                                method: "PATCH",
-                                                body: JSON.stringify({ is_deleted: true }),
-                                        });
+                                        await supabaseRequest((client) =>
+                                                client
+                                                        .from(TABLES.recurringConfig)
+                                                        .update({ is_deleted: true })
+                                                        .eq("id", entry.recurringConfigId!),
+                                        );
                                         await Promise.all(
-                                                exclusions.map(async (exclusion) => {
-                                                        await supabaseRequest(`${TABLES.exclusion}?id=eq.${exclusion.id}`, {
-                                                                method: "PATCH",
-                                                                body: JSON.stringify({ is_deleted: true }),
-                                                        });
-                                                }),
+                                                exclusions.map((exclusion) =>
+                                                        supabaseRequest((client) =>
+                                                                client
+                                                                        .from(TABLES.exclusion)
+                                                                        .update({ is_deleted: true })
+                                                                        .eq("id", exclusion.id),
+                                                        ),
+                                                ),
                                         );
                                 } else {
                                         const entryDate = entry.date.getTime();
                                         await Promise.all(
                                                 exclusions
                                                         .filter((exclusion) => new Date(exclusion.date).getTime() > entryDate)
-                                                        .map(async (exclusion) => {
-                                                                await supabaseRequest(`${TABLES.exclusion}?id=eq.${exclusion.id}`, {
-                                                                        method: "PATCH",
-                                                                        body: JSON.stringify({ is_deleted: true }),
-                                                                });
-                                                        }),
+                                                        .map((exclusion) =>
+                                                                supabaseRequest((client) =>
+                                                                        client
+                                                                                .from(TABLES.exclusion)
+                                                                                .update({ is_deleted: true })
+                                                                                .eq("id", exclusion.id),
+                                                                ),
+                                                        ),
                                         );
 
-                                        await supabaseRequest(`${TABLES.recurringConfig}?id=eq.${entry.recurringConfigId}`, {
-                                                method: "PATCH",
-                                                body: JSON.stringify({
-                                                        end_date: entry.date.toISOString(),
-                                                        interval: entry.index - 1,
-                                                }),
-                                        });
+                                        await supabaseRequest((client) =>
+                                                client
+                                                        .from(TABLES.recurringConfig)
+                                                        .update({
+                                                                end_date: entry.date.toISOString(),
+                                                                interval: entry.index - 1,
+                                                        })
+                                                        .eq("id", entry.recurringConfigId!),
+                                        );
                                 }
                         }
 
@@ -748,8 +771,12 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
                         if (applyToSubsequents && entry.recurringConfigId && entry.config) {
                                 const { data: exclusionsData, error: exclusionsError } =
-                                        await supabaseRequest<RawExclusionRow[]>(
-                                                `${TABLES.exclusion}?select=*&recurring_id=eq.${entry.recurringConfigId}&is_deleted=is.false`,
+                                        await supabaseRequest<RawExclusionRow[]>((client) =>
+                                                client
+                                                        .from<RawExclusionRow>(TABLES.exclusion)
+                                                        .select("*")
+                                                        .eq("recurring_id", entry.recurringConfigId!)
+                                                        .eq("is_deleted", false),
                                         );
 
                                 if (exclusionsError) {
@@ -762,12 +789,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
                                         exclusions
                                                 .filter((exclusion) => new Date(exclusion.date).getTime() > entry.date.getTime())
                                                 .map(async (exclusion) => {
-                                                        const { error } = await supabaseRequest(
-                                                                `${TABLES.exclusion}?id=eq.${exclusion.id}`,
-                                                                {
-                                                                        method: "PATCH",
-                                                                        body: JSON.stringify({ reason: "deletion" }),
-                                                                },
+                                                        const { error } = await supabaseRequest((client) =>
+                                                                client
+                                                                        .from(TABLES.exclusion)
+                                                                        .update({ reason: "deletion" })
+                                                                        .eq("id", exclusion.id),
                                                         );
 
                                                         if (error) {
@@ -853,9 +879,12 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
                 ];
 
                 for (const table of tables) {
-                        const { error } = await supabaseRequest(`${table}?id=neq.00000000-0000-0000-0000-000000000000`, {
-                                method: "DELETE",
-                        });
+                        const { error } = await supabaseRequest((client) =>
+                                client
+                                        .from(table)
+                                        .delete()
+                                        .neq("id", "00000000-0000-0000-0000-000000000000"),
+                        );
                         if (error) {
                                 console.error(`Failed to erase data from ${table}`, error);
                         }
