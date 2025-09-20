@@ -33,3 +33,4 @@ db.sqlite
 *.pem
 *.pub
 *.crt
+.env.loca
