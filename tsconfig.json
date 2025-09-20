@@ -23,7 +23,7 @@
 		"paths": {
 			"@/*": ["./src/*"]
 		},
-		"types": ["unplugin-fonts/client"]
+		// "types": ["unplugin-fonts/client"]
 	},
 	"include": ["src"],
 	"references": [
