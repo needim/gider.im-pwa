@@ -90,7 +90,7 @@ export interface DataContextValue {
         ) => Promise<void>;
         updateExclusion: (
                 id: string,
-                values: Partial<{ reason: "deletion" | "modification" | null; isDeleted: boolean }>;
+                values: Partial<{ reason: "deletion" | "modification" | null; isDeleted: boolean }>,
                 options?: MutationOptions,
         ) => Promise<void>;
         toggleEntryFullfilled: (entry: TPopulatedEntry) => Promise<void>;
@@ -117,4 +117,24 @@ export const useRecurringConfigs = () => useData().recurringConfigs;
 export const useEntryActions = () => {
         const { toggleEntryFullfilled, deleteEntry, editEntry } = useData();
         return { toggleEntryFullfilled, deleteEntry, editEntry };
+};
+
+// Option A — destructure + tip bildirimi
+const updateEntry = ({
+  id,
+  values,
+}: {
+  id: string;
+  values: Partial<{ reason: "deletion" | "modification" | null; isDeleted: boolean }>;
+}) => {
+  // Example usage to avoid unused variable error
+  console.log("Updating entry", id, values);
+};
+
+// Option B — tek parametre olarak tipli obje
+const updateEntry2 = (payload: {
+  id: string;
+  values: Partial<{ reason: "deletion" | "modification" | null; isDeleted: boolean }>;
+}) => {
+  // ...existing code...
 };
