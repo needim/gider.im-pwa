@@ -13,17 +13,16 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { groupsQuery, tagsQuery } from "@/evolu-queries";
+import { useGroups, useTags } from "@/contexts/data";
 import { useFilters } from "@/hooks/use-filters";
 import { useLocalization } from "@/hooks/use-localization";
 import { cn } from "@/lib/utils";
-import { useQuery } from "@evolu/react";
 import { IconCheck } from "@tabler/icons-react";
 
 export function Filters() {
-	const groups = useQuery(groupsQuery).rows;
-	const tags = useQuery(tagsQuery).rows;
-	const { m } = useLocalization();
+        const groups = useGroups();
+        const tags = useTags();
+        const { m } = useLocalization();
 
 	const { activeFilters: values, add, remove, clear } = useFilters();
 

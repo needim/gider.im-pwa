@@ -10,11 +10,8 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-	type TPopulatedEntry,
-	deleteEntry,
-	toggleFullfilled,
-} from "@/evolu-queries";
+import { useEntryActions } from "@/contexts/data";
+import type { TPopulatedEntry } from "@/evolu-queries";
 import { useLocalization } from "@/hooks/use-localization";
 import { cn } from "@/lib/utils";
 import {
@@ -30,14 +27,15 @@ import type React from "react";
 import { useId } from "react";
 
 export function EntryRow({
-	entry,
-	editDialogRef,
+        entry,
+        editDialogRef,
 }: {
-	entry: TPopulatedEntry;
-	editDialogRef: React.MutableRefObject<EntryEditDialogRef | null>;
-	long?: boolean;
+        entry: TPopulatedEntry;
+        editDialogRef: React.MutableRefObject<EntryEditDialogRef | null>;
+        long?: boolean;
 }): React.ReactElement {
-	const { m, lang } = useLocalization();
+        const { m, lang } = useLocalization();
+        const { toggleEntryFullfilled, deleteEntry } = useEntryActions();
 
 	const rowId = useId();
 
@@ -55,7 +53,7 @@ export function EntryRow({
 					whileTap={{ scale: 0.97 }}
 					onClick={(e) => {
 						e.stopPropagation();
-						toggleFullfilled(entry);
+                                                void toggleEntryFullfilled(entry);
 					}}
 					className="border-r cursor-pointer border-zinc-100 dark:border-zinc-900 p-3 pl-3"
 				>
@@ -138,7 +136,7 @@ export function EntryRow({
 							<DropdownMenuItem
 								onSelect={async () => {
 									setTimeout(() => {
-										deleteEntry(entry, false, () => {});
+                                                                                void deleteEntry(entry, false);
 									}, 100);
 								}}
 							>
@@ -149,7 +147,7 @@ export function EntryRow({
 								<DropdownMenuItem
 									onSelect={async () => {
 										setTimeout(() => {
-											deleteEntry(entry, true, () => {});
+                                                                                    void deleteEntry(entry, true);
 										}, 100);
 									}}
 								>

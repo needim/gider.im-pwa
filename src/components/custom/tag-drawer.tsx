@@ -6,10 +6,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { type TEvoluDB, decodeName } from "@/evolu-db";
-import { deleteTag, tagsQuery } from "@/evolu-queries";
+import { decodeName } from "@/evolu-db";
+import { useData } from "@/contexts/data";
 import { useLocalization } from "@/hooks/use-localization";
-import { useEvolu, useQuery } from "@evolu/react";
 import { IconPlus, IconTags, IconTrash } from "@tabler/icons-react";
 import React, { forwardRef, useImperativeHandle } from "react";
 
@@ -21,9 +20,8 @@ export interface TagDrawerRef {
 }
 
 export const TagDrawer = forwardRef<TagDrawerRef, TagDrawerProps>((_, ref) => {
-	const { create, update } = useEvolu<TEvoluDB>();
-	const tags = useQuery(tagsQuery);
-	const [open, setOpen] = React.useState(false);
+        const { tags, createTag, updateTagColor, deleteTag } = useData();
+        const [open, setOpen] = React.useState(false);
 	const [newTagName, setNewTagName] = React.useState<string>("");
 	const [newTagColor, setNewTagColor] = React.useState<string>("zinc");
 	const { m } = useLocalization();
@@ -45,10 +43,9 @@ export const TagDrawer = forwardRef<TagDrawerRef, TagDrawerProps>((_, ref) => {
 		{ suggestId: "bill", name: m.Bill(), color: "blue" },
 	];
 
-	const availableSuggestedTags = suggestedTags.filter(
-		(suggestedTag) =>
-			!tags.rows.some((tag) => tag.suggestId === suggestedTag.suggestId),
-	);
+        const availableSuggestedTags = suggestedTags.filter(
+                (suggestedTag) => !tags.some((tag) => tag.suggestId === suggestedTag.suggestId),
+        );
 
 	return (
 		<>
@@ -67,7 +64,7 @@ export const TagDrawer = forwardRef<TagDrawerRef, TagDrawerProps>((_, ref) => {
 						<div className="text-lg text-left flex justify-between items-center capitalize font-medium leading-none tracking-tight h-11">
 							{m.Tags()}
 						</div>
-						{tags.rows.length === 0 && (
+                                                {tags.length === 0 && (
 							<div className="pb-6 py-4 flex flex-col gap-2 text-muted-foreground text-center text-balance mt-4">
 								<IconTags className="size-12 mb-3 mx-auto stroke-1 text-zinc-400 dark:text-zinc-600" />
 								{m.TagsEmptyDesc()}
@@ -90,25 +87,26 @@ export const TagDrawer = forwardRef<TagDrawerRef, TagDrawerProps>((_, ref) => {
 									className="rounded-l-none"
 								/>
 							</div>
-							<Button
-								variant="default"
-								size="icon"
-								className="shrink-0"
-								onClick={() => {
-									create("entryTag", {
-										name: decodeName(newTagName),
-										color: newTagColor,
-									});
-									setNewTagColor("zinc");
-									setNewTagName("");
-								}}
-							>
+                                                        <Button
+                                                                variant="default"
+                                                                size="icon"
+                                                                className="shrink-0"
+                                                                onClick={() => {
+                                                                        const parsedName = decodeName(newTagName);
+                                                                        void createTag({
+                                                                                name: parsedName,
+                                                                                color: newTagColor,
+                                                                        });
+                                                                        setNewTagColor("zinc");
+                                                                        setNewTagName("");
+                                                                }}
+                                                        >
 								<IconPlus className="size-5" />
 							</Button>
 						</div>
-						{tags.rows.length > 0 && (
-							<div className="grid grid-cols-1 gap-0.5 mt-4">
-								{tags.rows.map((tag) => (
+                                                {tags.length > 0 && (
+                                                        <div className="grid grid-cols-1 gap-0.5 mt-4">
+                                                                {tags.map((tag) => (
 									<div
 										key={tag.id}
 										className="flex items-center justify-between p-3 py-2 rounded bg-zinc-100 dark:bg-zinc-900"
@@ -118,9 +116,9 @@ export const TagDrawer = forwardRef<TagDrawerRef, TagDrawerProps>((_, ref) => {
 												className="text-base font-medium"
 												dotClassName="size-4 mr-1"
 												allowColorChange
-												onColorChange={(color) => {
-													update("entryTag", { id: tag.id, color });
-												}}
+                                                                                                onColorChange={(color) => {
+                                                                                                        void updateTagColor(tag.id, color);
+                                                                                                }}
 												name={tag.name}
 												color={tag.color as TagColor}
 											/>
@@ -129,7 +127,7 @@ export const TagDrawer = forwardRef<TagDrawerRef, TagDrawerProps>((_, ref) => {
 											size="icon"
 											variant="outline"
 											onClick={() => {
-												deleteTag(tag.id);
+                                                                                                void deleteTag(tag.id);
 											}}
 										>
 											<IconTrash className="size-5" />
@@ -157,17 +155,18 @@ export const TagDrawer = forwardRef<TagDrawerRef, TagDrawerProps>((_, ref) => {
 													color={tag.color as TagColor}
 												/>
 											</div>
-											<Button
-												size="icon"
-												variant="outline"
-												onClick={() => {
-													create("entryTag", {
-														name: decodeName(tag.name),
-														color: tag.color,
-														suggestId: tag.suggestId,
-													});
-												}}
-											>
+                                                                                        <Button
+                                                                                                size="icon"
+                                                                                                variant="outline"
+                                                                                                onClick={() => {
+                                                                                                        const parsedName = decodeName(tag.name);
+                                                                                                        void createTag({
+                                                                                                                name: parsedName,
+                                                                                                                color: tag.color,
+                                                                                                                suggestId: tag.suggestId,
+                                                                                                        });
+                                                                                                }}
+                                                                                        >
 												<IconPlus className="size-5" />
 											</Button>
 										</div>

@@ -3,9 +3,8 @@ import type { TagColor } from "@/components/custom/tag-color-picker";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem } from "@/components/ui/select";
 import type { TTagId } from "@/evolu-db";
-import { tagsQuery } from "@/evolu-queries";
+import { useTags } from "@/contexts/data";
 import { useLocalization } from "@/hooks/use-localization";
-import { useQuery } from "@evolu/react";
 import { SelectTrigger } from "@radix-ui/react-select";
 import { IconTag } from "@tabler/icons-react";
 
@@ -16,9 +15,9 @@ export function TagSelect({
 	value: string | undefined;
 	onValueChange: (value: TTagId) => void;
 }) {
-	const tags = useQuery(tagsQuery);
-	const { m } = useLocalization();
-	const selectedTag = tags.rows.find((t) => t.id === value);
+        const tags = useTags();
+        const { m } = useLocalization();
+        const selectedTag = tags.find((t) => t.id === value);
 
 	return (
 		<Select onValueChange={onValueChange} value={value || "no-tag"}>
@@ -46,7 +45,7 @@ export function TagSelect({
 			</SelectTrigger>
 			<SelectContent>
 				<SelectItem value="no-tag">{m.Tag()}</SelectItem>
-				{tags.rows.map((tag) => (
+                                {tags.map((tag) => (
 					<SelectItem key={tag.id} value={tag.id}>
 						<Tag
 							className="ml-0"
