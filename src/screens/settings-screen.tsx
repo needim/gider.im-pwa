@@ -28,14 +28,12 @@ import { useLocalization } from "@/hooks/use-localization";
 import { cn, storageKeys } from "@/lib/utils";
 import { useOwner } from "@evolu/react";
 import {
-  IconAlertTriangleFilled,
   IconCashBanknoteFilled,
   IconCategoryFilled,
   IconChevronRight,
   IconCloudDownload,
   IconContrastFilled,
   IconDecimal,
-  IconExternalLink,
   IconEyeFilled,
   IconHeartFilled,
   IconKeyFilled,
@@ -94,30 +92,6 @@ export function SettingsScreen() {
       <div className="flex-1 h-svh overflow-y-auto py-4 relative">
         <div className="px-4">
           <div className="text-3xl font-bold mb-4">Settings</div>
-
-          {/* Deprecation Banner */}
-          <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border-2 border-amber-500/30">
-            <div className="flex items-start gap-3">
-              <IconAlertTriangleFilled className="size-6 text-amber-500 shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <h2 className="font-semibold text-amber-600 dark:text-amber-400 mb-1">
-                  {m.DeprecationTitle()}
-                </h2>
-                <p className="text-sm text-amber-700 dark:text-amber-300/80 mb-3">
-                  {m.DeprecationDescription()}
-                </p>
-                <a
-                  href="https://gider.im"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700 dark:text-amber-300 hover:underline"
-                >
-                  {m.GoToNewApp()}
-                  <IconExternalLink className="size-4" />
-                </a>
-              </div>
-            </div>
-          </div>
 
           <div className="flex flex-col gap-6 mb-4">
             <div>

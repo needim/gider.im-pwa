@@ -166,5 +166,14 @@
 	"DeprecationTitle": "This Version Is No Longer Supported",
 	"DeprecationDescription": "We've moved to a new and improved version of gider.im. This PWA version will no longer receive updates or support. Please visit our new app to continue managing your finances.",
 	"GoToNewApp": "Go to New App",
-	"ContinueAnyway": "Continue anyway"
+	"ContinueAnyway": "Continue anyway",
+	"Assets": "Assets",
+	"AssetsDesc": "You will add your assets to keep track of your net worth.",
+	"Data": "Data",
+	"InProgress": "In progress...",
+	"Insights": "Insights",
+	"Loading": "Loading...",
+	"MadeBy": "Made by",
+	"MonthlyOverview": "Monthly overview",
+	"Reload": "Reload the app"
 }

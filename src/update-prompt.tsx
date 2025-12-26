@@ -1,14 +1,14 @@
 import { useRegisterSW } from "virtual:pwa-register/react";
-import { ToastAction, ToastClose } from "@/components/ui/toast";
-import { useToast } from "@/components/ui/use-toast";
+// import { ToastAction, ToastClose } from "@/components/ui/toast";
+// import { useToast } from "@/components/ui/use-toast";
 import { useEffect } from "react";
 
 const PERIOD = 30 * 1000; // 30 seconds
 
 function UpdatePrompt() {
 	const {
-		needRefresh: [needRefresh, setNeedRefresh],
-		updateServiceWorker,
+		needRefresh: [needRefresh, _setNeedRefresh],
+		//updateServiceWorker,
 	} = useRegisterSW({
 		onRegisteredSW: (_swURL, _registration) => {
 			_registration &&
@@ -22,34 +22,34 @@ function UpdatePrompt() {
 		},
 	});
 
-	const { toast } = useToast();
+	// const { toast } = useToast();
 
-	const close = () => setNeedRefresh(false);
-	const update = () => updateServiceWorker(true);
+	// const close = () => setNeedRefresh(false);
+	// const update = () => updateServiceWorker(true);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: we don't need to add toast to the dependencies
 	useEffect(() => {
 		if (needRefresh) {
-			toast({
-				title: "New version 🎉",
-				description: "Reload to update the app.",
-				type: "background",
-				duration: 10000,
-				action: (
-					<>
-						<ToastAction
-							altText="Reload"
-							onClick={async () => {
-								await update();
-								close();
-							}}
-						>
-							Reload
-						</ToastAction>
-						<ToastClose onClick={() => close()}>Dismiss</ToastClose>
-					</>
-				),
-			});
+			// toast({
+			// 	title: "New version 🎉",
+			// 	description: "Reload to update the app.",
+			// 	type: "background",
+			// 	duration: 10000,
+			// 	action: (
+			// 		<>
+			// 			<ToastAction
+			// 				altText="Reload"
+			// 				onClick={async () => {
+			// 					await update();
+			// 					close();
+			// 				}}
+			// 			>
+			// 				Reload
+			// 			</ToastAction>
+			// 			<ToastClose onClick={() => close()}>Dismiss</ToastClose>
+			// 		</>
+			// 	),
+			// });
 		}
 	}, [needRefresh]);
 
