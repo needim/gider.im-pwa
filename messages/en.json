@@ -162,5 +162,9 @@
 	"ExportData": "Export data",
 	"Export": "Export",
 	"Warning": "Warning!",
-	"FutureEntriesWillBeOverwritten": "Future entries will be overwritten."
+	"FutureEntriesWillBeOverwritten": "Future entries will be overwritten.",
+	"DeprecationTitle": "This Version Is No Longer Supported",
+	"DeprecationDescription": "We've moved to a new and improved version of gider.im. This PWA version will no longer receive updates or support. Please visit our new app to continue managing your finances.",
+	"GoToNewApp": "Go to New App",
+	"ContinueAnyway": "Continue anyway"
 }
