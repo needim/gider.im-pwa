@@ -67,7 +67,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
 		"@changesets/cli": "^2.27.9",
-		"@inlang/paraglide-js": "1.11.3",
+		"@inlang/paraglide-js": "1.11.8",
 		"@inlang/paraglide-vite": "^1.2.76",
 		"@types/node": "^22.9.0",
 		"@types/react": "^18.3.12",
